@@ -47,7 +47,7 @@ export async function registerPlayerAction(
     const userId = user.id
 
     // 0b. Check for existing registration (backend protection)
-    const TOURNAMENT_ID = '8681b997-c81b-4395-89f4-2792e3be75e5'
+    const TOURNAMENT_ID = process.env.NEXT_PUBLIC_TOURNAMENT_ID || '8681b997-c81b-4395-89f4-2792e3be75e5'
     const { data: existingReg } = await supabase
       .from('registrations')
       .select('id')
@@ -198,9 +198,9 @@ export async function registerPlayerAction(
     const registrationId = regData.id
 
     // Fetch tournament details dynamically
-    let tournamentName = 'Play To Network 3v3 Mini Football Tournament'
-    let tournamentDate = 'Sunday, July 12th'
-    let tournamentLocation = 'Hyperdrive Arena'
+    let tournamentName = process.env.NEXT_PUBLIC_TOURNAMENT_NAME || 'Play To Network 3v3 Mini Football Tournament'
+    let tournamentDate = process.env.NEXT_PUBLIC_TOURNAMENT_DATE || 'Sunday, July 12th'
+    let tournamentLocation = process.env.NEXT_PUBLIC_TOURNAMENT_LOCATION || 'Hyperdrive Arena'
     try {
       const tourney = await TournamentRepository.getTournamentById(supabase, TOURNAMENT_ID)
       if (tourney) {
@@ -220,7 +220,7 @@ export async function registerPlayerAction(
         name: name,
         email: email,
         type: regType,
-        fee: regType === 'team' ? 3000 : 600,
+        fee: regType === 'team' ? parseInt(process.env.TOURNAMENT_TEAM_FEE || '3000', 10) : parseInt(process.env.TOURNAMENT_INDIVIDUAL_FEE || '600', 10),
         paymentStatus: 'Pending',
         tournamentName,
         date: tournamentDate,

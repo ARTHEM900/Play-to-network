@@ -28,14 +28,14 @@ function getResendClient(): Resend {
     } else {
       console.log(`[EMAIL] Initializing Resend client with API key prefix: ${apiKey.substring(0, 8)}...`)
     }
-    resendClient = new Resend(apiKey || 're_dummy_key_for_testing')
+    resendClient = new Resend(apiKey || '')
   }
   return resendClient
 }
 
-const CONFIGURED_FROM_EMAIL = process.env.EMAIL_FROM || process.env.RESEND_FROM_EMAIL || 'Play To Network <onboarding@resend.dev>'
+const CONFIGURED_FROM_EMAIL = process.env.EMAIL_FROM || process.env.RESEND_FROM_EMAIL || process.env.NEXT_PUBLIC_DEFAULT_FROM_EMAIL || 'Play To Network <onboarding@resend.dev>'
 
-const VERIFIED_FROM_EMAIL = 'Play To Network <onboarding@resend.dev>'
+const VERIFIED_FROM_EMAIL = process.env.RESEND_VERIFIED_FROM_EMAIL || 'Play To Network <onboarding@resend.dev>'
 
 const AUDIT_LOG_PREFIX = '[EMAIL]'
 

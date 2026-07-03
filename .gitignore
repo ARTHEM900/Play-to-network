@@ -4,12 +4,48 @@ __v0_devtools.tsx
 __v0_jsx-dev-runtime.ts
 .snowflake/
 .v0-trash/
-.vercel/
 
-# Environment variables
+# Environment Variables
+.env
+.env.local
+.env.development
+.env.production
 .env*.local
 
-# Common ignores
-node_modules
+# Dependencies
+node_modules/
+
+# Next.js
 .next/
+out/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Vercel
+.vercel/
+
+# Supabase Local
+.supabase/
+
+# Secrets
+passdb.txt
+
+# OS
 .DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Build
+dist/
+coverage/
+
+# Temporary
+*.tmp
+*.temp

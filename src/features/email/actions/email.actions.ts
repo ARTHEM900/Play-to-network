@@ -36,9 +36,9 @@ export async function resendEmailAction(
 
     // 3. Trigger correct email template based on type
     if (emailType === 'confirmation') {
-      let tournamentName = 'PTN 3v3 Mini Football Tournament'
-      let tournamentDate = 'Sunday, July 12th'
-      let tournamentLocation = 'Hyperdrive Arena'
+      let tournamentName = process.env.NEXT_PUBLIC_TOURNAMENT_NAME || 'PTN 3v3 Mini Football Tournament'
+      let tournamentDate = process.env.NEXT_PUBLIC_TOURNAMENT_DATE || 'Sunday, July 12th'
+      let tournamentLocation = process.env.NEXT_PUBLIC_TOURNAMENT_LOCATION || 'Hyperdrive Arena'
       try {
         const tourney = await TournamentRepository.getTournamentById(supabase, reg.tournament_id)
         if (tourney) {
@@ -50,7 +50,9 @@ export async function resendEmailAction(
         console.error('Failed to fetch tournament info for resend email payload:', err)
       }
 
-      const fee = reg.registration_type === 'team' ? 1800 : 600
+      const teamFee = parseInt(process.env.TOURNAMENT_TEAM_FEE || '1800', 10)
+      const individualFee = parseInt(process.env.TOURNAMENT_INDIVIDUAL_FEE || '600', 10)
+      const fee = reg.registration_type === 'team' ? teamFee : individualFee
       emailResult = await EmailService.sendRegistrationConfirmation({
         registrationNumber: reg.registration_number,
         name: team.captain_name,
