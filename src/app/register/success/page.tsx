@@ -5,15 +5,10 @@ import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { 
-  Check, 
   Home, 
   Eye, 
-  ChevronRight, 
-  Calendar, 
   User, 
   Users, 
-  FileText, 
-  HelpCircle,
   MessageSquare,
   Clock,
   AlertCircle
@@ -22,6 +17,7 @@ import {
 import { PtnNavbar } from "@/shared/components/ptn-navbar"
 import { PtnFooter } from "@/shared/components/ptn-footer"
 import { Button } from "@/shared/components/ui/button"
+import { Skeleton } from "@/shared/components/skeleton"
 
 function RegisterSuccessContent() {
   const searchParams = useSearchParams()
@@ -65,12 +61,7 @@ function RegisterSuccessContent() {
       <div className="text-center mb-10">
         <div className="relative mb-6 mx-auto w-20 h-20">
           {/* Ring Glow */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.6 }}
-            animate={{ opacity: 1, scale: 1.2 }}
-            transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-            className="absolute inset-0 rounded-full bg-primary/10 blur-xl pointer-events-none"
-          />
+          <div className="absolute inset-0 rounded-full bg-primary/10 blur-xl pointer-events-none" />
 
           <motion.div
             initial={{ scale: 0.5, opacity: 0 }}
@@ -400,8 +391,15 @@ export default function RegisterSuccessPage() {
       <PtnNavbar />
 
       <Suspense fallback={
-        <div className="flex-grow pt-32 pb-20 flex flex-col items-center justify-center">
-          <div className="text-white/40 animate-pulse text-xs font-bold uppercase tracking-widest">Loading confirmation details...</div>
+        <div className="flex-grow pt-32 pb-20 flex flex-col items-center justify-center gap-6">
+          <Skeleton className="h-20 w-20 rounded-full" />
+          <Skeleton className="h-8 w-64 rounded-xl" />
+          <Skeleton className="h-4 w-48" />
+          <Skeleton className="h-4 w-80" />
+          <div className="w-full max-w-sm space-y-4 mt-4">
+            <Skeleton className="h-12 w-full rounded-xl" />
+            <Skeleton className="h-12 w-full rounded-xl" />
+          </div>
         </div>
       }>
         <RegisterSuccessContent />

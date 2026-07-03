@@ -9,6 +9,7 @@ import { PtnFooter } from "@/shared/components/ptn-footer"
 import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
+import { Skeleton } from "@/shared/components/skeleton"
 import { User } from "@supabase/supabase-js"
 
 type Profile = {
@@ -93,9 +94,28 @@ export default function ProfilePage() {
     return (
       <main className="min-h-screen bg-background flex flex-col">
         <PtnNavbar />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-muted-foreground animate-pulse">Loading profile...</div>
+        <div className="flex-1 pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full space-y-8">
+          <div className="flex justify-between items-center">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-10 w-24 rounded-lg" />
+          </div>
+          <div className="bg-card border border-border rounded-xl p-6 md:p-8 space-y-6">
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-4 w-64" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-10 w-full rounded-lg" /></div>
+              <div className="space-y-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-10 w-full rounded-lg" /></div>
+              <div className="space-y-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-10 w-full rounded-lg" /></div>
+              <div className="space-y-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-10 w-full rounded-lg" /></div>
+            </div>
+            <div className="flex justify-end">
+              <Skeleton className="h-10 w-32 rounded-lg" />
+            </div>
+          </div>
         </div>
+        <PtnFooter />
       </main>
     )
   }

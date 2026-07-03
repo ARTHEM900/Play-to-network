@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, memo } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
@@ -13,15 +13,14 @@ import {
   Bell, 
   ChevronRight, 
   Plus, 
-  LogOut, 
   Shield, 
   ArrowRight, 
   Target, 
   CheckCircle2, 
-  Award,
   AlertCircle,
   X
 } from "lucide-react"
+import { Skeleton, SkeletonCard } from "@/shared/components/skeleton"
 
 import { createClient } from "@/lib/supabase/client"
 import { ProfileRepository } from "@/lib/repositories/profile.repository"
@@ -76,7 +75,7 @@ interface UserProfile {
   memberSince: string
 }
 
-export default function DashboardPage() {
+const DashboardPage = memo(function DashboardPage() {
   const router = useRouter()
   const supabase = createClient()
   
@@ -271,7 +270,7 @@ export default function DashboardPage() {
   }
 
   // Handle Team Creation
-  const handleCreateTeamSubmit = (e: React.FormEvent) => {
+  const handleCreateTeamSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault()
     if (!newTeamName.trim()) return
 
@@ -293,24 +292,27 @@ export default function DashboardPage() {
       currentTournament: newTeamTourney
     }
 
-    setTeams([newTeam, ...teams])
+    setTeams(prev => [newTeam, ...prev])
     
     // If registered to a tournament during creation, reflect it in tournaments
     if (newTeamTourney !== "None") {
-      const tourneyExists = tournaments.find(t => t.name === newTeamTourney)
-      if (!tourneyExists) {
-        setTournaments([
-          {
-            id: `tr_${Date.now()}`,
-            name: newTeamTourney,
-            sport: "Football",
-            status: "Active",
-            progress: 10,
-            resultSummary: "Registered"
-          },
-          ...tournaments
-        ])
-      }
+      setTournaments(prev => {
+        const tourneyExists = prev.find(t => t.name === newTeamTourney)
+        if (!tourneyExists) {
+          return [
+            {
+              id: `tr_${Date.now()}`,
+              name: newTeamTourney,
+              sport: "Football",
+              status: "Active",
+              progress: 10,
+              resultSummary: "Registered"
+            },
+            ...prev
+          ]
+        }
+        return prev
+      })
     }
 
     // Add notification
@@ -321,23 +323,23 @@ export default function DashboardPage() {
       time: "Just now",
       unread: true
     }
-    setNotifications([newNotification, ...notifications])
+    setNotifications(prev => [newNotification, ...prev])
 
     setShowCreateTeam(false)
     setNewTeamName("")
     setNewTeamCaptain(true)
     setNewTeamTourney("None")
     triggerToast(`Team "${newTeamName}" created successfully!`)
-  }
+  }, [newTeamName, newTeamCaptain, newTeamTourney])
 
   // Handle Team Registration
-  const handleRegisterTeamSubmit = (e: React.FormEvent) => {
+  const handleRegisterTeamSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault()
     const targetTeam = teams.find(t => t.id === regSelectedTeam)
     if (!targetTeam) return
 
     // Update team tournament status
-    setTeams(teams.map(t => {
+    setTeams(prev => prev.map(t => {
       if (t.id === regSelectedTeam) {
         return { ...t, currentTournament: regSelectedTourney }
       }
@@ -345,20 +347,23 @@ export default function DashboardPage() {
     }))
 
     // Add tournament to active list
-    const tourneyExists = tournaments.find(t => t.name === regSelectedTourney)
-    if (!tourneyExists) {
-      setTournaments([
-        {
-          id: `tr_${Date.now()}`,
-          name: regSelectedTourney,
-          sport: "Esports",
-          status: "Active",
-          progress: 5,
-          resultSummary: "Awaiting Group Allocation"
-        },
-        ...tournaments
-      ])
-    }
+    setTournaments(prev => {
+      const tourneyExists = prev.find(t => t.name === regSelectedTourney)
+      if (!tourneyExists) {
+        return [
+          {
+            id: `tr_${Date.now()}`,
+            name: regSelectedTourney,
+            sport: "Esports",
+            status: "Active",
+            progress: 5,
+            resultSummary: "Awaiting Group Allocation"
+          },
+          ...prev
+        ]
+      }
+      return prev
+    })
 
     // Add notification
     const newNotification: PtnNotification = {
@@ -368,11 +373,11 @@ export default function DashboardPage() {
       time: "Just now",
       unread: true
     }
-    setNotifications([newNotification, ...notifications])
+    setNotifications(prev => [newNotification, ...prev])
 
     setShowRegisterTeam(false)
     triggerToast(`Successfully registered ${targetTeam.name} for ${regSelectedTourney}!`)
-  }
+  }, [teams, regSelectedTeam, regSelectedTourney])
 
   // Mark all notifications as read
   const markAllNotificationsRead = () => {
@@ -392,9 +397,33 @@ export default function DashboardPage() {
     return (
       <main className="min-h-screen bg-[#050505] text-foreground selection:bg-primary/30 flex flex-col font-sans relative overflow-x-hidden">
         <PtnNavbar />
-        <div className="flex-grow pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full relative z-10 flex flex-col items-center justify-center">
-          <div className="w-12 h-12 border-2 border-primary/30 border-t-primary rounded-full animate-spin mb-4" />
-          <p className="text-white/50 text-sm font-semibold">Loading your dashboard...</p>
+        <div className="flex-grow pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full relative z-10 space-y-8">
+          <div className="flex items-center gap-5 p-6 rounded-2xl border border-white/5 bg-[#0A0A0A]/40">
+            <Skeleton className="h-16 w-16 rounded-2xl" />
+            <div className="space-y-2 flex-1">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-32 w-full rounded-2xl" />
+              <Skeleton className="h-8 w-32" />
+              <Skeleton className="h-40 w-full rounded-2xl" />
+            </div>
+            <div className="space-y-6">
+              <Skeleton className="h-8 w-36" />
+              <Skeleton className="h-48 w-full rounded-2xl" />
+              <Skeleton className="h-8 w-28" />
+              <Skeleton className="h-32 w-full rounded-2xl" />
+            </div>
+          </div>
         </div>
         <PtnFooter />
       </main>
@@ -562,11 +591,8 @@ export default function DashboardPage() {
                 </div>
               ) : (
               <div className="grid grid-cols-1 gap-4">
-                  {registrationsList.map((reg, idx) => (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: idx * 0.05 }}
+                  {registrationsList.map((reg) => (
+                    <div
                       key={reg.id}
                       className="p-5 rounded-2xl border border-white/5 bg-[#0A0A0A]/40 backdrop-blur-md flex flex-col md:flex-row justify-between md:items-center gap-4 hover:border-white/10 hover:bg-[#0A0A0A]/60 transition-all duration-300"
                     >
@@ -620,7 +646,7 @@ export default function DashboardPage() {
                           </span>
                         </div>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               )}
@@ -643,11 +669,8 @@ export default function DashboardPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {teams.map((team, idx) => (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3, delay: idx * 0.05 }}
+                {teams.map((team) => (
+                  <div
                     key={team.id}
                     className="p-5 rounded-2xl border border-white/5 bg-[#0A0A0A]/40 backdrop-blur-md hover:border-white/10 hover:bg-[#0A0A0A]/60 transition-all duration-300 group flex flex-col"
                   >
@@ -693,7 +716,7 @@ export default function DashboardPage() {
                         </span>
                       )}
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </section>
@@ -725,11 +748,8 @@ export default function DashboardPage() {
               </div>
 
               <div className="space-y-4">
-                {tournaments.filter(t => t.status === activeTab).map((t, idx) => (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: idx * 0.05 }}
+                {tournaments.filter(t => t.status === activeTab).map((t) => (
+                  <div
                     key={t.id}
                     className="p-5 rounded-2xl border border-white/5 bg-[#0A0A0A]/40 backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-6"
                   >
@@ -776,7 +796,7 @@ export default function DashboardPage() {
                         </Button>
                       </Link>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
 
                 {tournaments.filter(t => t.status === activeTab).length === 0 && (
@@ -841,11 +861,8 @@ export default function DashboardPage() {
               </div>
 
               <div className="space-y-3">
-                {matches.map((m, idx) => (
-                  <motion.div
-                    initial={{ opacity: 0, x: 15 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: idx * 0.05 }}
+                {matches.map((m) => (
+                  <div
                     key={m.id}
                     className="p-4 rounded-xl border border-white/5 bg-[#0A0A0A]/40 backdrop-blur-md flex flex-col hover:border-white/10 transition-colors"
                   >
@@ -866,7 +883,7 @@ export default function DashboardPage() {
                         Match Center <ArrowRight className="w-3 h-3" />
                       </Link>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </section>
@@ -1201,4 +1218,8 @@ export default function DashboardPage() {
       </AnimatePresence>
     </main>
   )
-}
+})
+
+DashboardPage.displayName = "DashboardPage"
+
+export default DashboardPage

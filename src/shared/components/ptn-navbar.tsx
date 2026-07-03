@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Menu, X, LogOut } from "lucide-react"
+import { LogOut } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { PtnLogo } from "./ptn-logo"
 import Link from "next/link"
@@ -19,7 +19,6 @@ const NAV_LINKS = [
 
 export function PtnNavbar() {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -164,68 +163,7 @@ export function PtnNavbar() {
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground md:hidden"
-          aria-label={open ? "Close menu" : "Open menu"}
-        >
-          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
       </nav>
-
-      {open && (
-        <div className="border-t border-border bg-background/95 backdrop-blur-xl md:hidden">
-          <ul className="flex flex-col gap-1 px-4 py-4">
-            {computedLinks.map((link) => (
-              <li key={link.label}>
-                <a
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className="block rounded-md px-3 py-3 text-base font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
-            <li className="mt-2 flex flex-col gap-2">
-              {authLoading ? (
-                <div className="h-10 w-full bg-white/5 rounded animate-pulse" />
-              ) : isLoggedIn ? (
-                <>
-                  <Link href={isAdmin ? "/admin" : "/dashboard"} onClick={() => setOpen(false)}>
-                    <Button variant="outline" className="w-full border-border bg-transparent">
-                      Dashboard
-                    </Button>
-                  </Link>
-                  <Button
-                    onClick={() => {
-                      setOpen(false)
-                      handleLogout()
-                    }}
-                    className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 font-bold"
-                  >
-                    Log Out
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Link href="/login" onClick={() => setOpen(false)}>
-                    <Button variant="outline" className="w-full border-border bg-transparent">
-                      Login
-                    </Button>
-                  </Link>
-                  <Link href="/login" onClick={() => setOpen(false)}>
-                    <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-                      Sign Up
-                    </Button>
-                  </Link>
-                </>
-              )}
-            </li>
-          </ul>
-        </div>
-      )}
     </motion.header>
   )
 }

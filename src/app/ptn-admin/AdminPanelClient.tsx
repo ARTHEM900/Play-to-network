@@ -28,7 +28,6 @@ import {
 import { PtnNavbar } from "@/shared/components/ptn-navbar"
 import { PtnFooter } from "@/shared/components/ptn-footer"
 import { Button } from "@/shared/components/ui/button"
-import { Skeleton } from "@/shared/components/skeleton"
 import { Input } from "@/shared/components/ui/input"
 import { LogoutButton } from "@/features/auth/components/logout-button"
 
@@ -63,7 +62,7 @@ interface Registration {
 
 
 
-export default function PtnAdminDashboard() {
+export default function AdminPanelClient() {
   const [registrations, setRegistrations] = useState<Registration[]>([])
   const [matches, setMatches] = useState<any[]>([])
   const [widgetTab, setWidgetTab] = useState<"Live" | "Upcoming" | "Completed">("Live")
@@ -73,7 +72,7 @@ export default function PtnAdminDashboard() {
   
   // Modals state
   const [selectedReg, setSelectedReg] = useState<Registration | null>(null)
-  const [isConfirmDelete, setIsConfirmDelete] = useState<string | null>(null) // Contains ID to delete
+  const [isConfirmDelete, setIsConfirmDelete] = useState<string | null>(null)
   const [toastMessage, setToastMessage] = useState<{ text: string; type: "success" | "info" | "error" } | null>(null)
 
   // Trigger floating notifications
@@ -150,7 +149,6 @@ export default function PtnAdminDashboard() {
       })
   }, [])
 
-  // Handle status transitions
   const handleUpdateStatus = async (id: string, newStatus: "Approved" | "Pending" | "Rejected") => {
     const reg = registrations.find(r => r.id === id)
     const dbId = reg?.rawId || id
@@ -158,7 +156,7 @@ export default function PtnAdminDashboard() {
     let rejectionReason: string | undefined = undefined
     if (newStatus === "Rejected") {
       const val = prompt("Enter rejection reason (optional):")
-      if (val === null) return // Cancelled
+      if (val === null) return
       rejectionReason = val || undefined
     }
 
@@ -194,7 +192,6 @@ export default function PtnAdminDashboard() {
     showToast(`Registration ID ${id} status updated to ${newStatus}`, newStatus === "Approved" ? "success" : newStatus === "Rejected" ? "error" : "info")
   }
 
-  // Handle Delete
   const handleDeleteRegistration = async (id: string) => {
     const reg = registrations.find(r => r.id === id)
     const dbId = reg?.rawId || id
@@ -216,7 +213,6 @@ export default function PtnAdminDashboard() {
     showToast(`Registration ID ${id} deleted successfully.`, "error")
   }
 
-  // Filtered dataset
   const filteredRegistrations = useMemo(() => {
     return registrations.filter(reg => {
       const matchesSearch = 
@@ -231,17 +227,14 @@ export default function PtnAdminDashboard() {
     })
   }, [registrations, searchQuery, filterType, filterStatus])
 
-  // Statistics summaries (based on loaded registrations to show dynamic metrics)
   const stats = useMemo(() => {
     const total = registrations.length
     const teams = registrations.filter(r => r.type === "team").length
     const individuals = registrations.filter(r => r.type === "individual").length
     
-    // Count of pending verifications and approved registrations
     const pendingVerifications = registrations.filter(r => r.status === "Pending").length
     const approvedRegistrations = registrations.filter(r => r.status === "Approved").length
 
-    // Revenue calculations (Approved: teams * 1800 + individuals * 600)
     const approvedTeams = registrations.filter(r => r.type === "team" && r.status === "Approved").length
     const approvedIndividuals = registrations.filter(r => r.type === "individual" && r.status === "Approved").length
     const approvedRevenue = (approvedTeams * 1800) + (approvedIndividuals * 600)
@@ -262,7 +255,6 @@ export default function PtnAdminDashboard() {
     }
   }, [registrations])
 
-  // CSV Exporter logic
   const handleExportCSV = async () => {
     try {
       showToast("Preparing export…", "info")
@@ -292,7 +284,6 @@ export default function PtnAdminDashboard() {
       <PtnNavbar />
 
       <div className="pt-28 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto w-full">
-        {/* Header Block */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -321,9 +312,7 @@ export default function PtnAdminDashboard() {
           </div>
         </div>
 
-        {/* Dynamic Metric Stripes */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          {/* Card 1 */}
           <div className="bg-[#0B0B0B]/60 backdrop-blur-xl border border-white/5 p-6 rounded-2xl relative overflow-hidden group hover:border-primary/20 transition-all duration-300">
             <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl transition-all group-hover:bg-primary/10" />
             <div className="flex items-center justify-between mb-4">
@@ -339,7 +328,6 @@ export default function PtnAdminDashboard() {
             </div>
           </div>
 
-          {/* Card 2 */}
           <div className="bg-[#0B0B0B]/60 backdrop-blur-xl border border-white/5 p-6 rounded-2xl relative overflow-hidden group hover:border-primary/20 transition-all duration-300">
             <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl transition-all group-hover:bg-primary/10" />
             <div className="flex items-center justify-between mb-4">
@@ -354,7 +342,6 @@ export default function PtnAdminDashboard() {
             </div>
           </div>
 
-          {/* Card 3 */}
           <div className="bg-[#0B0B0B]/60 backdrop-blur-xl border border-white/5 p-6 rounded-2xl relative overflow-hidden group hover:border-primary/20 transition-all duration-300">
             <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl transition-all group-hover:bg-primary/10" />
             <div className="flex items-center justify-between mb-4">
@@ -369,7 +356,6 @@ export default function PtnAdminDashboard() {
             </div>
           </div>
 
-          {/* Card 4 */}
           <div className="bg-[#0B0B0B]/60 backdrop-blur-xl border border-white/5 p-6 rounded-2xl relative overflow-hidden group hover:border-primary/20 transition-all duration-300">
             <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl transition-all group-hover:bg-primary/10" />
             <div className="flex items-center justify-between mb-4">
@@ -388,7 +374,6 @@ export default function PtnAdminDashboard() {
           </div>
         </div>
 
-        {/* Live Match Center Widget */}
         <div className="bg-[#0B0B0B]/60 backdrop-blur-xl border border-white/5 p-6 rounded-2xl mb-10 space-y-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-white/5">
             <div>
@@ -413,7 +398,6 @@ export default function PtnAdminDashboard() {
             </div>
           </div>
 
-          {/* Widget Tabs */}
           <div className="flex gap-4">
             {["Live", "Upcoming", "Completed"].map((tab) => {
               const count = matches.filter(m => m.status === tab).length
@@ -434,7 +418,6 @@ export default function PtnAdminDashboard() {
             })}
           </div>
 
-          {/* Matches List */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {matches.filter(m => m.status === widgetTab).length === 0 ? (
               <div className="col-span-full py-8 text-center text-white/40 text-xs font-semibold uppercase tracking-wider border border-dashed border-white/5 rounded-xl bg-black/20">
@@ -464,7 +447,6 @@ export default function PtnAdminDashboard() {
           </div>
         </div>
 
-        {/* Search and Filters Controls Area */}
         <div className="bg-[#0B0B0B]/50 backdrop-blur-xl border border-white/5 p-5 rounded-2xl mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="relative w-full md:w-96">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-white/40" />
@@ -534,24 +516,10 @@ export default function PtnAdminDashboard() {
           </div>
         </div>
 
-        {/* Table Area */}
         <div className="bg-[#0B0B0B]/40 backdrop-blur-xl border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
           {loading ? (
-            <div className="p-8 space-y-4">
-              <div className="flex items-center gap-4 p-4">
-                <Skeleton className="h-10 w-10 rounded-lg" />
-                <div className="space-y-2 flex-1"><Skeleton className="h-4 w-48" /><Skeleton className="h-3 w-32" /></div>
-                <Skeleton className="h-8 w-24 rounded-lg" />
-              </div>
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex items-center gap-4 px-4 py-3 border-t border-white/5">
-                  <Skeleton className="h-8 w-8 rounded-lg" />
-                  <div className="space-y-1.5 flex-1"><Skeleton className="h-3 w-40" /><Skeleton className="h-3 w-24" /></div>
-                  <Skeleton className="h-6 w-20 rounded-full" />
-                  <Skeleton className="h-6 w-20 rounded-full" />
-                  <Skeleton className="h-8 w-8 rounded-lg" />
-                </div>
-              ))}
+            <div className="py-20 flex flex-col items-center justify-center text-center px-4">
+              <span className="text-white/40 text-sm font-semibold animate-pulse">Loading registrations...</span>
             </div>
           ) : filteredRegistrations.length === 0 ? (
             <div className="py-20 flex flex-col items-center justify-center text-center px-4">
@@ -581,7 +549,6 @@ export default function PtnAdminDashboard() {
                       key={reg.id}
                       className="hover:bg-white/[0.01] transition-all group"
                     >
-                      {/* ID / Date */}
                       <td className="py-4.5 px-6">
                         <div className="font-mono text-xs font-semibold text-white/90">{reg.id}</div>
                         <div className="text-xxs text-white/40 flex items-center gap-1 mt-1 font-bold uppercase tracking-wider">
@@ -590,7 +557,6 @@ export default function PtnAdminDashboard() {
                         </div>
                       </td>
 
-                      {/* Type */}
                       <td className="py-4.5 px-6">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xxs font-extrabold tracking-wider uppercase ${
                           reg.type === "team" 
@@ -601,12 +567,10 @@ export default function PtnAdminDashboard() {
                         </span>
                       </td>
 
-                      {/* Name */}
                       <td className="py-4.5 px-6 font-bold text-white group-hover:text-primary transition-colors">
                         {reg.name}
                       </td>
 
-                      {/* Captain / Roster preview */}
                       <td className="py-4.5 px-6">
                         {reg.type === "team" ? (
                           <div>
@@ -624,12 +588,10 @@ export default function PtnAdminDashboard() {
                         )}
                       </td>
 
-                      {/* Contact */}
                       <td className="py-4.5 px-6 text-xs text-white/70">
                         <div>{reg.phone}</div>
                       </td>
 
-                      {/* Status */}
                       <td className="py-4.5 px-6 text-center">
                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xxs font-extrabold uppercase tracking-widest ${
                           reg.status === "Approved" 
@@ -645,7 +607,6 @@ export default function PtnAdminDashboard() {
                         </span>
                       </td>
 
-                      {/* Action buttons */}
                       <td className="py-4.5 px-6 text-right">
                         <div className="flex items-center justify-end gap-1.5 opacity-90 group-hover:opacity-100 transition-opacity">
                           <button
@@ -694,11 +655,9 @@ export default function PtnAdminDashboard() {
         </div>
       </div>
 
-      {/* Roster/Registration Details Modal Drawer */}
       {selectedReg && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md transition-all">
           <div className="bg-[#0B0B0B] border border-white/10 rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-3xl flex flex-col relative animate-in fade-in zoom-in-95 duration-200">
-            {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-white/5 p-6 sticky top-0 bg-[#0B0B0B] z-10">
               <div>
                 <div className="flex items-center gap-2 mb-1">
@@ -719,9 +678,7 @@ export default function PtnAdminDashboard() {
               </button>
             </div>
 
-            {/* Modal Body */}
             <div className="p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
-              {/* Left Column: Information */}
               <div className="lg:col-span-6 flex flex-col gap-6">
                 <div>
                   <h4 className="text-xs uppercase font-extrabold tracking-widest text-primary mb-3">Participant Details</h4>
@@ -815,7 +772,6 @@ export default function PtnAdminDashboard() {
 
               </div>
 
-              {/* Right Column: UPI Receipt Viewer */}
               <div className="lg:col-span-6 flex flex-col gap-6">
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -826,12 +782,9 @@ export default function PtnAdminDashboard() {
                     </span>
                   </div>
 
-                  {/* High-Fidelity PhonePe/GPay Receipt Viewer UI */}
                   <div className="relative mx-auto max-w-[280px] sm:max-w-[320px] bg-[#0E0F14] border-4 border-[#1E202B] rounded-[36px] overflow-hidden shadow-2xl p-4 flex flex-col gap-4">
-                    {/* Speaker notch */}
                     <div className="absolute top-2 left-1/2 -translate-x-1/2 w-16 h-4 bg-[#1E202B] rounded-full z-10" />
 
-                    {/* Receipt header */}
                     <div className="flex flex-col items-center justify-center pt-6 text-center">
                       <div className="size-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-2 mt-2">
                         <Check className="size-6 stroke-[3px]" />
@@ -840,7 +793,6 @@ export default function PtnAdminDashboard() {
                       <div className="text-white/40 text-xxs mt-0.5">{selectedReg.date} • 14:32:09</div>
                     </div>
 
-                    {/* Amount Block */}
                     <div className="bg-black/40 border border-white/5 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
                       <span className="text-white/40 text-xxs uppercase tracking-wider font-semibold">Amount Received</span>
                       <div className="text-2xl font-black text-white mt-1">₹{selectedReg.amount}.00</div>
@@ -849,7 +801,6 @@ export default function PtnAdminDashboard() {
                       </span>
                     </div>
 
-                    {/* Meta Blocks */}
                     <div className="bg-black/25 rounded-2xl p-4.5 border border-white/5 flex flex-col gap-3.5 text-xs">
                       <div>
                         <div className="text-white/40 text-xxs font-bold uppercase tracking-wider">UPI Transaction ID</div>
@@ -887,7 +838,6 @@ export default function PtnAdminDashboard() {
                       </div>
                     </div>
 
-                    {/* Footer receipt link */}
                     <a
                       href={selectedReg.paymentScreenshotUrl || "/receipt.png"}
                       target="_blank"
@@ -905,7 +855,6 @@ export default function PtnAdminDashboard() {
         </div>
       )}
 
-      {/* Confirmation Delete Dialog */}
       {isConfirmDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
           <div className="bg-[#0B0B0B] border border-red-500/20 rounded-2xl max-w-md w-full p-6 text-center animate-in fade-in zoom-in-95 duration-200">
@@ -935,7 +884,6 @@ export default function PtnAdminDashboard() {
         </div>
       )}
 
-      {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 bg-[#0B0B0B] border border-white/10 rounded-xl shadow-2xl animate-in slide-in-from-bottom-5 duration-300">
           <div className={`p-1.5 rounded-lg ${

@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, memo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { 
-  Trophy, Radio, Calendar, MapPin, Clock, Plus, Trash2, Edit2, Check, X, 
-  ArrowLeft, RefreshCw, Play, Pause, Square, PlusCircle, MinusCircle, Save
+  MapPin, Clock, Plus, Trash2, Edit2, Check, X, 
+  ArrowLeft, Play, Pause, Square, PlusCircle, MinusCircle, Save
 } from "lucide-react"
+import { Skeleton } from "@/shared/components/skeleton"
 import Link from "next/link"
 import { PtnNavbar } from "@/shared/components/ptn-navbar"
 import { PtnFooter } from "@/shared/components/ptn-footer"
@@ -23,7 +24,7 @@ import {
   changeLiveMatchStatusAction
 } from "@/features/admin/actions/live-match.actions"
 
-export default function AdminLiveCenter() {
+function AdminLiveCenter() {
   const [matches, setMatches] = useState<any[]>([])
   const [teams, setTeams] = useState<any[]>([])
   const [tournaments, setTournaments] = useState<any[]>([])
@@ -50,14 +51,14 @@ export default function AdminLiveCenter() {
 
   const [toastMessage, setToastMessage] = useState<{ text: string; type: "success" | "error" | "info" } | null>(null)
 
-  const showToast = (text: string, type: "success" | "error" | "info" = "success") => {
+  const showToast = useCallback((text: string, type: "success" | "error" | "info" = "success") => {
     setToastMessage({ text, type })
     setTimeout(() => setToastMessage(null), 4000)
-  }
+  }, [])
 
   const supabase = createClient()
 
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
     try {
       const [matchesList, teamsList, tournamentsList] = await Promise.all([
         MatchRepository.getMatches(supabase),
@@ -81,16 +82,16 @@ export default function AdminLiveCenter() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedMatch, showToast])
 
   useEffect(() => {
     refreshData()
     const interval = setInterval(refreshData, 15000)
     return () => clearInterval(interval)
-  }, [selectedMatch?.id])
+  }, [refreshData])
 
   // Handle Match Creation
-  const handleCreateSubmit = async (e: React.FormEvent) => {
+  const handleCreateSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.tournament_id || !formData.team1_id || !formData.team2_id) {
       showToast("Please fill in all team and tournament selections.", "error")
@@ -105,10 +106,10 @@ export default function AdminLiveCenter() {
     } else {
       showToast(res.error || "Failed to create match", "error")
     }
-  }
+  }, [formData, showToast, refreshData])
 
   // Handle Match Save
-  const handleEditSubmit = async (e: React.FormEvent) => {
+  const handleEditSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedMatch) return
 
@@ -130,10 +131,10 @@ export default function AdminLiveCenter() {
     } else {
       showToast(res.error || "Failed to update match config", "error")
     }
-  }
+  }, [selectedMatch, formData, showToast, refreshData])
 
   // Handle Match Delete
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     if (!confirm("Are you sure you want to delete this match?")) return
     const res = await deleteLiveMatchAction(id)
     if (res.success) {
@@ -145,10 +146,10 @@ export default function AdminLiveCenter() {
     } else {
       showToast(res.error || "Failed to delete match", "error")
     }
-  }
+  }, [selectedMatch, showToast, refreshData])
 
   // Control Functions
-  const handleStartMatch = async (id: string) => {
+  const handleStartMatch = useCallback(async (id: string) => {
     const res = await changeLiveMatchStatusAction(id, "Live", 0)
     if (res.success) {
       showToast("Match Started! Status set to Live.", "success")
@@ -156,10 +157,9 @@ export default function AdminLiveCenter() {
     } else {
       showToast(res.error || "Action failed", "error")
     }
-  }
+  }, [showToast, refreshData])
 
-  const handleHalfTime = async (id: string) => {
-    // We can denote halftime by setting minute to 45
+  const handleHalfTime = useCallback(async (id: string) => {
     const res = await changeLiveMatchStatusAction(id, "Live", 45)
     if (res.success) {
       showToast("Match set to Half Time.", "info")
@@ -167,9 +167,9 @@ export default function AdminLiveCenter() {
     } else {
       showToast(res.error || "Action failed", "error")
     }
-  }
+  }, [showToast, refreshData])
 
-  const handleResumeMatch = async (id: string) => {
+  const handleResumeMatch = useCallback(async (id: string) => {
     const res = await changeLiveMatchStatusAction(id, "Live", 46)
     if (res.success) {
       showToast("Match resumed for Second Half.", "success")
@@ -177,9 +177,9 @@ export default function AdminLiveCenter() {
     } else {
       showToast(res.error || "Action failed", "error")
     }
-  }
+  }, [showToast, refreshData])
 
-  const handleFullTime = async (id: string) => {
+  const handleFullTime = useCallback(async (id: string) => {
     const res = await changeLiveMatchStatusAction(id, "Completed", 90)
     if (res.success) {
       showToast("Match concluded! Status set to Completed.", "info")
@@ -187,9 +187,9 @@ export default function AdminLiveCenter() {
     } else {
       showToast(res.error || "Action failed", "error")
     }
-  }
+  }, [showToast, refreshData])
 
-  const handleScoreChange = async (id: string, s1: number, s2: number) => {
+  const handleScoreChange = useCallback(async (id: string, s1: number, s2: number) => {
     const res = await updateLiveMatchScoreAction(id, s1, s2)
     if (res.success) {
       showToast("Scores updated successfully", "success")
@@ -197,22 +197,22 @@ export default function AdminLiveCenter() {
     } else {
       showToast(res.error || "Failed to update scores", "error")
     }
-  }
+  }, [showToast, refreshData])
 
-  const handleGoalTeam1 = (matchItem: any) => {
+  const handleGoalTeam1 = useCallback((matchItem: any) => {
     handleScoreChange(matchItem.id, (matchItem.team1_score ?? 0) + 1, matchItem.team2_score ?? 0)
-  }
+  }, [handleScoreChange])
 
-  const handleGoalTeam2 = (matchItem: any) => {
+  const handleGoalTeam2 = useCallback((matchItem: any) => {
     handleScoreChange(matchItem.id, matchItem.team1_score ?? 0, (matchItem.team2_score ?? 0) + 1)
-  }
+  }, [handleScoreChange])
 
-  const handleResetScore = (matchItem: any) => {
+  const handleResetScore = useCallback((matchItem: any) => {
     if (!confirm("Are you sure you want to reset scores to 0 - 0?")) return
     handleScoreChange(matchItem.id, 0, 0)
-  }
+  }, [handleScoreChange])
 
-  const handleSaveMinute = async (id: string, min: number) => {
+  const handleSaveMinute = useCallback(async (id: string, min: number) => {
     const res = await changeLiveMatchStatusAction(id, selectedMatch.status, min)
     if (res.success) {
       showToast("Minute updated!", "success")
@@ -220,9 +220,9 @@ export default function AdminLiveCenter() {
     } else {
       showToast(res.error || "Failed to save minute", "error")
     }
-  }
+  }, [selectedMatch, showToast, refreshData])
 
-  const handleOpenEdit = (matchItem: any) => {
+  const handleOpenEdit = useCallback((matchItem: any) => {
     setSelectedMatch(matchItem)
     setFormData({
       tournament_id: matchItem.tournament_id || "",
@@ -237,9 +237,9 @@ export default function AdminLiveCenter() {
       group_name: matchItem.group_name || ""
     })
     setIsEditOpen(true)
-  }
+  }, [])
 
-  const handleOpenCreate = () => {
+  const handleOpenCreate = useCallback(() => {
     setFormData({
       tournament_id: tournaments[0]?.id || "",
       team1_id: teams[0]?.id || "",
@@ -253,7 +253,7 @@ export default function AdminLiveCenter() {
       group_name: "Group A"
     })
     setIsCreateOpen(true)
-  }
+  }, [tournaments, teams])
 
   return (
     <main className="min-h-screen bg-[#050505] text-foreground selection:bg-primary/30 pb-20 relative">
@@ -293,8 +293,33 @@ export default function AdminLiveCenter() {
         </div>
 
         {loading ? (
-          <div className="py-20 text-center text-white/40 text-sm font-medium animate-pulse">
-            Loading score center configurations...
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              <div className="lg:col-span-7 space-y-4">
+                <Skeleton className="h-4 w-40" />
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="p-5 rounded-2xl border border-white/5 bg-[#0A0A0A]/40 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-6 w-16 rounded-lg" />
+                    </div>
+                    <div className="flex justify-between items-center py-2">
+                      <Skeleton className="h-5 w-24" />
+                      <Skeleton className="h-4 w-8" />
+                      <Skeleton className="h-5 w-24" />
+                    </div>
+                    <div className="flex gap-2">
+                      <Skeleton className="h-8 flex-1 rounded-lg" />
+                      <Skeleton className="h-8 flex-1 rounded-lg" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="lg:col-span-5 space-y-4">
+                <Skeleton className="h-4 w-36" />
+                <Skeleton className="h-64 w-full rounded-2xl" />
+              </div>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -736,3 +761,5 @@ export default function AdminLiveCenter() {
     </main>
   )
 }
+
+export default memo(AdminLiveCenter)

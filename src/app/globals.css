@@ -175,6 +175,129 @@
   }
 }
 
+/* ============================================ */
+/* SCROLL PERFORMANCE                          */
+/* ============================================ */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* Prevent horizontal scroll on all devices */
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure touch targets minimum sizes */
+@supports (touch-action: manipulation) {
+  button, a, [role="button"], input, select, textarea {
+    touch-action: manipulation;
+  }
+}
+
+/* Mobile-first touch targets: ensure minimum hit area */
+@media (max-width: 768px) {
+  button, a, [role="button"], .btn-mobile {
+    min-height: 44px;
+  }
+  
+  input, select, textarea {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+  
+  /* Prevent horizontal overflow on any container */
+  .max-w-full {
+    max-width: 100vw !important;
+  }
+  
+  /* Fix for 320px devices */
+  .px-4 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  /* Ensure cards don't overflow on small screens */
+  [class*="grid-cols-"] {
+    overflow: hidden;
+  }
+}
+
+/* Small phone support (320px-374px) */
+@media (max-width: 374px) {
+  html {
+    font-size: 14px;
+  }
+  .px-4 {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+}
+
+/* Keyboard overlap prevention for mobile */
+@media (max-height: 500px) {
+  .fixed-bottom {
+    position: static !important;
+  }
+}
+
+/* Safe area support for modern mobile devices */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pl-safe {
+    padding-left: env(safe-area-inset-left);
+  }
+  .pr-safe {
+    padding-right: env(safe-area-inset-right);
+  }
+  .min-h-safe {
+    min-height: calc(100vh + env(safe-area-inset-bottom));
+  }
+}
+
+/* ============================================ */
+/* REDUCED MOTION / ACCESSIBILITY              */
+/* ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Optimize animated elements for GPU acceleration */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* Prevent layout shift from lazy-loaded images */
+img[loading="lazy"] {
+  background: transparent;
+}
+
 /* Tailwind CSS v4 custom logo utilities */
 @utility logo-serif-text {
   font-family: var(--font-logo-serif), 'Cinzel', serif;
@@ -195,6 +318,129 @@
   color: #FFFFFF;
   -webkit-text-stroke: 0.5px rgba(0, 230, 118, 0.85);
   text-shadow: 0 0 8px rgba(0, 230, 118, 0.5), 0 0 20px rgba(0, 230, 118, 0.2);
+}
+
+/* ============================================ */
+/* SKELETON LOADER ANIMATIONS                  */
+/* ============================================ */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ============================================ */
+/* MOBILE BOTTOM NAV SPACING                   */
+/* ============================================ */
+@media (max-width: 768px) {
+  .pb-nav {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 16px));
+  }
+  
+  body {
+    padding-bottom: 0;
+  }
+}
+
+/* ============================================ */
+/* IMPROVED MOBILE SPACING & TYPOGRAPHY        */
+/* ============================================ */
+@media (max-width: 768px) {
+  h1.font-heading.text-4xl {
+    font-size: 1.75rem !important;
+    line-height: 1.15 !important;
+  }
+  
+  h2.font-heading.text-2xl {
+    font-size: 1.25rem !important;
+  }
+  
+  .gap-8 {
+    gap: 1.25rem !important;
+  }
+  
+  .p-6 {
+    padding: 1.25rem !important;
+  }
+  
+  .p-8 {
+    padding: 1.5rem !important;
+  }
+}
+
+/* ============================================ */
+/* GESTURE SUPPORT - SWIPE INDICATORS          */
+/* ============================================ */
+.swipeable {
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.swipeable:active {
+  cursor: grabbing;
+}
+
+/* Smooth scroll container for horizontal scroll */
+.scroll-container-x {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.scroll-container-x::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================ */
+/* BETTER TOAST NOTIFICATION ANIMATIONS        */
+/* ============================================ */
+.toast-enter {
+  animation: toast-slide-up 0.3s ease-out forwards;
+}
+
+.toast-exit {
+  animation: toast-slide-down 0.2s ease-in forwards;
+}
+
+@keyframes toast-slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-slide-down {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* ============================================ */
+/* STICKY ELEMENT SUPPORT                      */
+/* ============================================ */
+.sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 40;
 }
 
 /* Force Turbopack Cache Invalidation */

@@ -1,9 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { Radio, Calendar, MapPin, Trophy, Clock, ArrowRight } from "lucide-react"
+import { Skeleton, SkeletonCard } from "@/shared/components/skeleton"
+import { PullToRefresh } from "@/shared/components/pull-to-refresh"
 import { PtnNavbar } from "@/shared/components/ptn-navbar"
 import { PtnFooter } from "@/shared/components/ptn-footer"
 import { createClient } from "@/lib/supabase/client"
@@ -50,10 +52,27 @@ export default function PublicLivePage() {
       : "TBD"
   }
 
+  const handleRefresh = useCallback(async () => {
+    try {
+      const supabase = createClient()
+      const [live, upcoming, completed] = await Promise.all([
+        MatchRepository.getLiveMatches(supabase),
+        MatchRepository.getUpcomingMatches(supabase),
+        MatchRepository.getCompletedMatches(supabase)
+      ])
+      setLiveMatches(live || [])
+      setUpcomingMatches(upcoming || [])
+      setCompletedMatches(completed || [])
+    } catch (err) {
+      console.error("Pull to refresh failed:", err)
+    }
+  }, [])
+
   return (
     <main className="min-h-screen bg-[#050505] text-foreground selection:bg-primary/30 pb-20 relative">
       <PtnNavbar />
 
+      <PullToRefresh onRefresh={handleRefresh}>
       <div className="pt-28 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto w-full">
         {/* Header Block */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
@@ -72,8 +91,23 @@ export default function PublicLivePage() {
         </div>
 
         {loading ? (
-          <div className="py-20 text-center text-white/40 text-sm font-medium animate-pulse">
-            Loading match schedules...
+          <div className="space-y-12">
+            <div className="space-y-4">
+              <Skeleton className="h-5 w-32" />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(3)].map((_, i) => (
+                  <SkeletonCard key={i} />
+                ))}
+              </div>
+            </div>
+            <div className="space-y-4">
+              <Skeleton className="h-5 w-40" />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(3)].map((_, i) => (
+                  <SkeletonCard key={i + 3} />
+                ))}
+              </div>
+            </div>
           </div>
         ) : error ? (
           <div className="py-20 text-center text-red-500/80 text-sm font-medium">
@@ -152,6 +186,7 @@ export default function PublicLivePage() {
           </div>
         )}
       </div>
+      </PullToRefresh>
 
       <div className="mt-24">
         <PtnFooter />

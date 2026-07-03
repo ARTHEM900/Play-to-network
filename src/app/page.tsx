@@ -1,14 +1,16 @@
+import dynamic from "next/dynamic"
 import { PtnNavbar } from "@/shared/components/ptn-navbar"
-import { LiveTicker } from "@/shared/components/live-ticker"
 import { PtnHero } from "@/shared/components/ptn-hero"
-import { SportsCategories } from "@/shared/components/sports-categories"
-import { LiveEvents } from "@/shared/components/live-events"
-import { UpcomingEvents } from "@/shared/components/upcoming-events"
-import { ForPlayers } from "@/shared/components/for-players"
-import { ForOrganizers } from "@/shared/components/for-organizers"
-import { RecentResults } from "@/shared/components/recent-results"
-import { PtnFooter } from "@/shared/components/ptn-footer"
 import { CinematicLoader } from "@/shared/components/cinematic-loader"
+
+const LiveTicker = dynamic(() => import("@/shared/components/live-ticker").then(m => m.LiveTicker))
+const SportsCategories = dynamic(() => import("@/shared/components/sports-categories").then(m => m.SportsCategories))
+const LiveEvents = dynamic(() => import("@/shared/components/live-events").then(m => m.LiveEvents))
+const UpcomingEvents = dynamic(() => import("@/shared/components/upcoming-events").then(m => m.UpcomingEvents))
+const ForPlayers = dynamic(() => import("@/shared/components/for-players").then(m => m.ForPlayers))
+const ForOrganizers = dynamic(() => import("@/shared/components/for-organizers").then(m => m.ForOrganizers))
+const RecentResults = dynamic(() => import("@/shared/components/recent-results").then(m => m.RecentResults))
+const PtnFooter = dynamic(() => import("@/shared/components/ptn-footer").then(m => m.PtnFooter))
 
 export default function Page() {
   return (

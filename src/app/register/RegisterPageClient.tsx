@@ -1,24 +1,21 @@
 "use client"
 
-import { useState, useRef, useEffect, useCallback } from "react"
+import React, { useState, useRef, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
+import Image from "next/image"
 import { 
   Trophy, 
   MapPin, 
   IndianRupee, 
   Users, 
   User, 
-  Mail, 
-  Phone, 
   Upload, 
   FileText, 
-  Check, 
   Loader2, 
   AlertCircle,
   X,
   ShieldCheck,
-  Compass,
   LogIn,
   LayoutDashboard,
   ArrowLeft
@@ -34,7 +31,7 @@ import { config } from "@/lib/config"
 import { createClient } from "@/lib/supabase/client"
 import { registerPlayerAction } from "@/features/registrations/actions/register.actions"
 
-export default function RegisterPageClient() {
+function RegisterPageClient() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -139,7 +136,7 @@ export default function RegisterPageClient() {
     return () => clearInterval(interval)
   }, [isAuthenticated, authLoading, checkSessionAlive])
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = useCallback(async () => {
     try {
       const supabase = createClient()
       const currentPath = window.location.pathname + window.location.search
@@ -152,16 +149,16 @@ export default function RegisterPageClient() {
     } catch (err: any) {
       console.error("Google OAuth error:", err)
     }
-  }
+  }, [])
 
   // Handle inputs changes
-  const handleTeamChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setTeamForm({ ...teamForm, [e.target.id]: e.target.value })
-  }
+  const handleTeamChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setTeamForm(prev => ({ ...prev, [e.target.id]: e.target.value }))
+  }, [])
 
-  const handleIndChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setIndForm({ ...indForm, [e.target.id]: e.target.value })
-  }
+  const handleIndChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setIndForm(prev => ({ ...prev, [e.target.id]: e.target.value }))
+  }, [])
 
   // File drag & drop handlers
   const handleDragOver = (e: React.DragEvent) => {
@@ -173,7 +170,7 @@ export default function RegisterPageClient() {
     setIsDragOver(false)
   }
 
-  const validateAndSetFile = (file: File) => {
+  const validateAndSetFile = useCallback((file: File) => {
     setFileError(null)
     
     // Validate file size (5MB max)
@@ -201,21 +198,21 @@ export default function RegisterPageClient() {
     } else {
       setScreenshotPreview(null) // PDF has no image preview
     }
-  }
+  }, [])
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     setIsDragOver(false)
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       validateAndSetFile(e.dataTransfer.files[0])
     }
-  }
+  }, [validateAndSetFile])
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       validateAndSetFile(e.target.files[0])
     }
-  }
+  }, [validateAndSetFile])
 
   const triggerFileSelect = () => {
     fileInputRef.current?.click()
@@ -406,7 +403,7 @@ export default function RegisterPageClient() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-10 space-y-4"
+          className="will-change-transform text-center mb-10 space-y-4"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/20 bg-primary/10 text-primary text-xs font-bold tracking-widest uppercase">
             <Trophy className="w-3.5 h-3.5" /> Registration Open
@@ -424,12 +421,7 @@ export default function RegisterPageClient() {
         </motion.div>
 
         {/* Form Container Card */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="rounded-2xl border border-white/5 bg-[#0A0A0A]/40 backdrop-blur-xl shadow-2xl p-6 sm:p-8"
-        >
+        <div className="rounded-2xl border border-white/5 bg-[#0A0A0A]/40 backdrop-blur-xl shadow-2xl p-6 sm:p-8">
           {/* Auth Gate - shown when not authenticated */}
           {authLoading ? (
             <div className="flex flex-col items-center justify-center py-20">
@@ -614,216 +606,200 @@ export default function RegisterPageClient() {
 
           <form onSubmit={handleSubmit} className="space-y-8">
             
-            {/* 3. Dynamic Registration Form */}
-            <AnimatePresence mode="wait">
-              {regType === "team" ? (
-                <motion.div
-                  key="team-form"
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 10 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-6"
-                >
-                  <h3 className="text-lg font-heading font-bold text-white uppercase tracking-wider border-b border-white/5 pb-2 mb-4">
-                    Team Information
-                  </h3>
+            {/* 3. Dynamic Registration Form - rendered conditionally */}
+            {regType === "team" ? (
+              <div key="team-form" className="space-y-6">
+                <h3 className="text-lg font-heading font-bold text-white uppercase tracking-wider border-b border-white/5 pb-2 mb-4">
+                  Team Information
+                </h3>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="teamName">Team Name *</Label>
-                      <Input 
-                        id="teamName" 
-                        placeholder="e.g. FC Titans" 
-                        value={teamForm.teamName}
-                        onChange={handleTeamChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="preferredNation">Preferred Football Nation *</Label>
-                      <select 
-                        id="preferredNation" 
-                        value={teamForm.preferredNation}
-                        onChange={handleTeamChange}
-                        required
-                        className="flex h-10 w-full rounded-md border border-white/10 bg-black px-3 py-2 text-sm text-white placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        <option value="" disabled>Select Football Nation</option>
-                        <option value="Portugal">Portugal 🇵🇹</option>
-                        <option value="Argentina">Argentina 🇦🇷</option>
-                        <option value="Brazil">Brazil 🇧🇷</option>
-                        <option value="France">France 🇫🇷</option>
-                        <option value="Spain">Spain 🇪🇸</option>
-                        <option value="Germany">Germany 🇩🇪</option>
-                        <option value="Norway">Norway 🇳🇴</option>
-                        <option value="Netherlands">Netherlands 🇳🇱</option>
-                        <option value="England">England 🏴󠁧󠁢󠁥󠁮󠁧󠁿</option>
-                        <option value="USA">USA 🇺🇸</option>
-                        <option value="Mexico">Mexico 🇲🇽</option>
-                        <option value="Japan">Japan 🇯🇵</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="captainName">Player 1 (Captain) *</Label>
-                      <Input 
-                        id="captainName" 
-                        placeholder="e.g. Full Name" 
-                        value={teamForm.captainName}
-                        onChange={handleTeamChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="captainPhone">Captain Mobile Number *</Label>
-                      <Input 
-                        id="captainPhone" 
-                        placeholder="e.g. 9876543210" 
-                        type="tel"
-                        inputMode="numeric"
-                        value={teamForm.captainPhone}
-                        onChange={handleTeamChange}
-                        required
-                      />
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="teamName">Team Name *</Label>
+                    <Input 
+                      id="teamName" 
+                      placeholder="e.g. FC Titans" 
+                      value={teamForm.teamName}
+                      onChange={handleTeamChange}
+                      required
+                    />
                   </div>
 
-                  <h3 className="text-lg font-heading font-bold text-white uppercase tracking-wider border-b border-white/5 pb-2 mt-8 mb-4">
-                    Squad Roster (5 Players – Captain counts as Player 1)
-                  </h3>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="player1">Player 2 Name *</Label>
-                      <Input 
-                        id="player1" 
-                        placeholder="Full Name" 
-                        value={teamForm.player1}
-                        onChange={handleTeamChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="player2">Player 3 Name *</Label>
-                      <Input 
-                        id="player2" 
-                        placeholder="Full Name" 
-                        value={teamForm.player2}
-                        onChange={handleTeamChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="player3">Player 4 Name *</Label>
-                      <Input 
-                        id="player3" 
-                        placeholder="Full Name" 
-                        value={teamForm.player3}
-                        onChange={handleTeamChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="player4">Player 5 Name *</Label>
-                      <Input 
-                        id="player4" 
-                        placeholder="Full Name" 
-                        value={teamForm.player4}
-                        onChange={handleTeamChange}
-                        required
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="preferredNation">Preferred Football Nation *</Label>
+                    <select 
+                      id="preferredNation" 
+                      value={teamForm.preferredNation}
+                      onChange={handleTeamChange}
+                      required
+                      className="flex h-10 w-full rounded-md border border-white/10 bg-black px-3 py-2 text-sm text-white placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="" disabled>Select Football Nation</option>
+                      <option value="Portugal">Portugal 🇵🇹</option>
+                      <option value="Argentina">Argentina 🇦🇷</option>
+                      <option value="Brazil">Brazil 🇧🇷</option>
+                      <option value="France">France 🇫🇷</option>
+                      <option value="Spain">Spain 🇪🇸</option>
+                      <option value="Germany">Germany 🇩🇪</option>
+                      <option value="Norway">Norway 🇳🇴</option>
+                      <option value="Netherlands">Netherlands 🇳🇱</option>
+                      <option value="England">England 🏴󠁧󠁢󠁥󠁮󠁧󠁿</option>
+                      <option value="USA">USA 🇺🇸</option>
+                      <option value="Mexico">Mexico 🇲🇽</option>
+                      <option value="Japan">Japan 🇯🇵</option>
+                    </select>
                   </div>
 
-                  <h3 className="text-lg font-heading font-bold text-white uppercase tracking-wider border-b border-white/5 pb-2 mt-8 mb-4">
-                    Additional Details
-                  </h3>
-
-                  <div className="grid grid-cols-1 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="city">City *</Label>
-                      <Input 
-                        id="city" 
-                        value={teamForm.city}
-                        onChange={handleTeamChange}
-                        required
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="captainName">Player 1 (Captain) *</Label>
+                    <Input 
+                      id="captainName" 
+                      placeholder="e.g. Full Name" 
+                      value={teamForm.captainName}
+                      onChange={handleTeamChange}
+                      required
+                    />
                   </div>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="individual-form"
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-6"
-                >
-                  <h3 className="text-lg font-heading font-bold text-white uppercase tracking-wider border-b border-white/5 pb-2 mb-4">
-                    Player Details
-                  </h3>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="fullName">Full Name *</Label>
-                      <Input 
-                        id="fullName" 
-                        placeholder="e.g. Arjun Sharma" 
-                        value={indForm.fullName}
-                        onChange={handleIndChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Mobile Number *</Label>
-                      <Input 
-                        id="phone" 
-                        placeholder="e.g. 9876543210" 
-                        type="tel"
-                        inputMode="numeric"
-                        value={indForm.phone}
-                        onChange={handleIndChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="position">Preferred Position *</Label>
-                      <select 
-                        id="position"
-                        value={indForm.position}
-                        onChange={handleIndChange}
-                        className="flex h-11 w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm text-white focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                      >
-                        <option value="Forward">Forward</option>
-                        <option value="Midfielder">Midfielder</option>
-                        <option value="Defender">Defender</option>
-                        <option value="Goalkeeper">Goalkeeper</option>
-                        <option value="Flexible">Flexible / All-Rounder</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="city">City *</Label>
-                      <Input 
-                        id="city" 
-                        value={indForm.city}
-                        onChange={handleIndChange}
-                        required
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="captainPhone">Captain Mobile Number *</Label>
+                    <Input 
+                      id="captainPhone" 
+                      placeholder="e.g. 9876543210" 
+                      type="tel"
+                      inputMode="numeric"
+                      value={teamForm.captainPhone}
+                      onChange={handleTeamChange}
+                      required
+                    />
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                </div>
+
+                <h3 className="text-lg font-heading font-bold text-white uppercase tracking-wider border-b border-white/5 pb-2 mt-8 mb-4">
+                  Squad Roster (5 Players – Captain counts as Player 1)
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="player1">Player 2 Name *</Label>
+                    <Input 
+                      id="player1" 
+                      placeholder="Full Name" 
+                      value={teamForm.player1}
+                      onChange={handleTeamChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="player2">Player 3 Name *</Label>
+                    <Input 
+                      id="player2" 
+                      placeholder="Full Name" 
+                      value={teamForm.player2}
+                      onChange={handleTeamChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="player3">Player 4 Name *</Label>
+                    <Input 
+                      id="player3" 
+                      placeholder="Full Name" 
+                      value={teamForm.player3}
+                      onChange={handleTeamChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="player4">Player 5 Name *</Label>
+                    <Input 
+                      id="player4" 
+                      placeholder="Full Name" 
+                      value={teamForm.player4}
+                      onChange={handleTeamChange}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <h3 className="text-lg font-heading font-bold text-white uppercase tracking-wider border-b border-white/5 pb-2 mt-8 mb-4">
+                  Additional Details
+                </h3>
+
+                <div className="grid grid-cols-1 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="city">City *</Label>
+                    <Input 
+                      id="city" 
+                      value={teamForm.city}
+                      onChange={handleTeamChange}
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div key="individual-form" className="space-y-6">
+                <h3 className="text-lg font-heading font-bold text-white uppercase tracking-wider border-b border-white/5 pb-2 mb-4">
+                  Player Details
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name *</Label>
+                    <Input 
+                      id="fullName" 
+                      placeholder="e.g. Arjun Sharma" 
+                      value={indForm.fullName}
+                      onChange={handleIndChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Mobile Number *</Label>
+                    <Input 
+                      id="phone" 
+                      placeholder="e.g. 9876543210" 
+                      type="tel"
+                      inputMode="numeric"
+                      value={indForm.phone}
+                      onChange={handleIndChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="position">Preferred Position *</Label>
+                    <select 
+                      id="position"
+                      value={indForm.position}
+                      onChange={handleIndChange}
+                      className="flex h-11 w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm text-white focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                    >
+                      <option value="Forward">Forward</option>
+                      <option value="Midfielder">Midfielder</option>
+                      <option value="Defender">Defender</option>
+                      <option value="Goalkeeper">Goalkeeper</option>
+                      <option value="Flexible">Flexible / All-Rounder</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="city">City *</Label>
+                    <Input 
+                      id="city" 
+                      value={indForm.city}
+                      onChange={handleIndChange}
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* 4. Payment Section */}
             <div id="payment-section" className="border-t border-white/5 pt-8 space-y-6">
@@ -849,15 +825,16 @@ export default function RegisterPageClient() {
                   <div className="flex flex-col items-center justify-center w-full md:w-auto shrink-0">
                     <div 
                       onClick={() => setIsQrModalOpen(true)}
-                      className="w-48 h-48 sm:w-52 sm:h-52 rounded-xl bg-white border-4 border-primary/20 flex items-center justify-center relative p-3 shadow-[0_0_30px_rgba(0,230,118,0.15)] cursor-zoom-in hover:scale-[1.02] transition-transform duration-300"
+                      className="relative w-48 h-48 sm:w-52 sm:h-52 rounded-xl bg-white border-4 border-primary/20 flex items-center justify-center p-3 shadow-[0_0_30px_rgba(0,230,118,0.15)] cursor-zoom-in hover:scale-[1.02] transition-transform duration-300"
                     >
                       {/* Scanner line animation overlay */}
                       <div className="absolute inset-x-3 top-3 h-0.5 bg-primary/70 animate-pulse shadow-[0_0_10px_#00E676] rounded-full"></div>
                       
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img 
+                      <Image 
                         src="/images/payment/upi-qr.jpeg" 
                         alt="PTN Payment QR Code" 
+                        width={300}
+                        height={300}
                         className="w-full h-full object-contain"
                       />
                     </div>
@@ -939,65 +916,58 @@ export default function RegisterPageClient() {
                     accept=".jpg,.jpeg,.png,.pdf"
                   />
 
-                  <AnimatePresence mode="wait">
-                    {screenshot ? (
-                      <motion.div 
-                        key="file-info"
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        className="space-y-4 w-full max-w-xs flex flex-col items-center"
-                        onClick={(e) => e.stopPropagation()} // Stop click from bubbling to dropzone
-                      >
-                        {screenshotPreview ? (
-                          <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/10 shadow-lg">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img 
-                              src={screenshotPreview} 
-                              alt="Screenshot Preview" 
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-16 h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-primary">
-                            <FileText className="w-8 h-8" />
-                          </div>
-                        )}
+                  {screenshot ? (
+                    <div 
+                      key="file-info"
+                      className="space-y-4 w-full max-w-xs flex flex-col items-center"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {screenshotPreview ? (
+                        <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/10 shadow-lg">
+                          <Image 
+                            src={screenshotPreview} 
+                            alt="Screenshot Preview" 
+                            width={80}
+                            height={80}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-16 h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-primary">
+                          <FileText className="w-8 h-8" />
+                        </div>
+                      )}
 
-                        <div className="text-center">
-                          <p className="text-sm font-semibold text-white truncate max-w-[240px]">{screenshot.name}</p>
-                          <p className="text-[10px] text-white/40 mt-0.5">{(screenshot.size / 1024).toFixed(1)} KB • {screenshot.type.split("/")[1].toUpperCase()}</p>
-                        </div>
+                      <div className="text-center">
+                        <p className="text-sm font-semibold text-white truncate max-w-[240px]">{screenshot.name}</p>
+                        <p className="text-[10px] text-white/40 mt-0.5">{(screenshot.size / 1024).toFixed(1)} KB • {screenshot.type.split("/")[1].toUpperCase()}</p>
+                      </div>
 
-                        <Button 
-                          type="button" 
-                          variant="destructive" 
-                          size="xs"
-                          onClick={removeFile}
-                          className="h-8 px-3 rounded-lg text-[10px] uppercase font-bold tracking-wider flex items-center gap-1 bg-red-950/40 border border-red-500/30 text-red-400 hover:bg-red-900/50"
-                        >
-                          <X className="w-3.5 h-3.5" /> Remove Screenshot
-                        </Button>
-                      </motion.div>
-                    ) : (
-                      <motion.div 
-                        key="upload-prompt"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="space-y-3"
+                      <Button 
+                        type="button" 
+                        variant="destructive" 
+                        size="xs"
+                        onClick={removeFile}
+                        className="h-8 px-3 rounded-lg text-[10px] uppercase font-bold tracking-wider flex items-center gap-1 bg-red-950/40 border border-red-500/30 text-red-400 hover:bg-red-900/50"
                       >
-                        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 mx-auto group-hover:scale-105 transition-transform">
-                          <Upload className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-white">Drag & drop transaction screenshot here</p>
-                          <p className="text-xs text-white/40 mt-1">or click to browse local files</p>
-                        </div>
-                        <p className="text-[10px] text-white/30 uppercase font-bold tracking-widest pt-2">Accepted formats: JPG, JPEG, PNG, PDF (Max 5MB)</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                        <X className="w-3.5 h-3.5" /> Remove Screenshot
+                      </Button>
+                    </div>
+                  ) : (
+                    <div 
+                      key="upload-prompt"
+                      className="space-y-3"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 mx-auto group-hover:scale-105 transition-transform">
+                        <Upload className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-white">Drag & drop transaction screenshot here</p>
+                        <p className="text-xs text-white/40 mt-1">or click to browse local files</p>
+                      </div>
+                      <p className="text-[10px] text-white/30 uppercase font-bold tracking-widest pt-2">Accepted formats: JPG, JPEG, PNG, PDF (Max 5MB)</p>
+                    </div>
+                  )}
                 </div>
 
                 {fileError && (
@@ -1072,7 +1042,7 @@ export default function RegisterPageClient() {
           </form>
         </>
         )}
-        </motion.div>
+        </div>
       </div>
 
       {/* Lightbox QR Modal */}
@@ -1090,7 +1060,7 @@ export default function RegisterPageClient() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 350 }}
-              className="relative max-w-sm w-full aspect-square bg-white rounded-2xl p-6 border-4 border-primary/20 shadow-2xl flex flex-col items-center justify-center"
+              className="will-change-transform relative max-w-sm w-full aspect-square bg-white rounded-2xl p-6 border-4 border-primary/20 shadow-2xl flex flex-col items-center justify-center"
               onClick={(e) => e.stopPropagation()}
             >
               <button 
@@ -1100,10 +1070,11 @@ export default function RegisterPageClient() {
               >
                 <X className="w-5 h-5" />
               </button>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
+              <Image 
                 src="/images/payment/upi-qr.jpeg" 
                 alt="Enlarged PTN Payment QR Code" 
+                width={400}
+                height={400}
                 className="w-full h-full object-contain"
               />
             </motion.div>
@@ -1115,3 +1086,5 @@ export default function RegisterPageClient() {
     </main>
   )
 }
+
+export default React.memo(RegisterPageClient)
