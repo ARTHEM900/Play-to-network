@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { PtnLogo } from "./ptn-logo"
 
 const taglineItems = [
@@ -12,26 +12,32 @@ const taglineItems = [
 ]
 
 export function CinematicLoader() {
-  const [isMounted, setIsMounted] = useState(false)
+  const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    setIsMounted(true)
+    setVisible(true)
   }, [])
 
-  if (!isMounted) return null
+  const handleAnimationEnd = useCallback((e: React.AnimationEvent<HTMLDivElement>) => {
+    if (e.animationName === "loaderFadeOut") {
+      setVisible(false)
+    }
+  }, [])
+
+  if (!visible) return null
 
   return (
-    <div className="cinematic-loader fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#050505] overflow-hidden select-none">
-      {/* Subtle background glow */}
+    <div
+      className="cinematic-loader fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#050505] overflow-hidden select-none"
+      onAnimationEnd={handleAnimationEnd}
+    >
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent opacity-60 blur-3xl"></div>
 
       <div className="flex flex-col items-center gap-10 relative z-10">
-        {/* PTN Logo */}
         <div className="cinematic-logo" style={{ "--delay": "0.3s" } as React.CSSProperties}>
           <PtnLogo className="scale-125 sm:scale-150" />
         </div>
 
-        {/* Tagline sequence */}
         <div className="flex items-center gap-3 font-heading font-bold text-sm sm:text-base tracking-[0.25em] uppercase">
           {taglineItems.map((item) => (
             <span
@@ -60,7 +66,7 @@ export function CinematicLoader() {
           animation: wordFadeIn 0.4s ease-out var(--word-delay) forwards;
         }
         @keyframes loaderFadeOut {
-          to { opacity: 0; pointer-events: none; }
+          to { opacity: 0; }
         }
         @keyframes logoFadeIn {
           to { opacity: 1; transform: scale(1); }
