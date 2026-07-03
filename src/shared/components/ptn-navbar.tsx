@@ -109,7 +109,7 @@ export function PtnNavbar() {
       }`}
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2" aria-label="Play To Network home">
+        <Link href="/" prefetch={true} className="flex items-center gap-2" aria-label="Play To Network home">
           <PtnLogo />
         </Link>
 
@@ -134,7 +134,7 @@ export function PtnNavbar() {
             <div className="h-8 w-24 bg-white/5 rounded animate-pulse" />
           ) : isLoggedIn ? (
             <>
-              <Link href={isAdmin ? "/admin" : "/dashboard"}>
+              <Link href={isAdmin ? "/admin" : "/dashboard"} prefetch={true}>
                 <button className="text-sm font-bold text-white hover:text-white/80 transition-colors">
                   Dashboard
                 </button>
@@ -149,12 +149,12 @@ export function PtnNavbar() {
             </>
           ) : (
             <>
-              <Link href="/login">
+              <Link href="/login" prefetch={true}>
                 <button className="text-sm font-bold text-white hover:text-white/80 transition-colors">
                   Log In
                 </button>
               </Link>
-              <Link href="/login">
+              <Link href="/login" prefetch={true}>
                 <Button className="bg-primary text-black font-bold hover:bg-primary/90 px-6 rounded-md">
                   Sign Up
                 </Button>

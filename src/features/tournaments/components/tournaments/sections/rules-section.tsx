@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { ChevronDown } from "lucide-react"
 
 const RULES = [
@@ -63,28 +63,23 @@ export function RulesSection({ tournamentId, rules }: { tournamentId?: string; r
               </motion.div>
             </button>
             
-            <AnimatePresence>
-              {isOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                >
-                  <div className="p-5 pt-0 text-sm text-white/60 leading-relaxed border-t border-white/5 mt-2">
-                    {isCategoryFormat ? (
-                      <ul className="list-disc pl-5 space-y-2.5">
-                        {rule.items.map((item: string, idx: number) => (
-                          <li key={idx}>{item}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      rule.content
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <div
+              className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+            >
+              <div className={`overflow-hidden min-h-0 transition-opacity duration-300 ease-in-out ${isOpen ? "opacity-100" : "opacity-0"}`}>
+                <div className="p-5 pt-0 text-sm text-white/60 leading-relaxed border-t border-white/5 mt-2">
+                  {isCategoryFormat ? (
+                    <ul className="list-disc pl-5 space-y-2.5">
+                      {rule.items.map((item: string, idx: number) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    rule.content
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         )
       })}

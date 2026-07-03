@@ -3,6 +3,16 @@
 import { Trophy, Users, LayoutDashboard, Target, BarChart } from "lucide-react"
 import { motion } from "framer-motion"
 
+const orgLeftInitial = { opacity: 0, x: -20 }
+const orgLeftWhileInView = { opacity: 1, x: 0 }
+const orgViewport = { once: true, margin: "-50px" }
+const orgLeftTransition = { duration: 0.6 }
+const orgItemInitial = { opacity: 0, y: 10 }
+const orgItemWhileInView = { opacity: 1, y: 0 }
+const orgRightInitial = { opacity: 0, x: 20 }
+const orgRightWhileInView = { opacity: 1, x: 0 }
+const orgRightTransition = { duration: 0.6 }
+
 const FEATURES = [
   {
     title: "Create Events",
@@ -38,10 +48,10 @@ export function ForOrganizers() {
         <div className="grid gap-12 lg:grid-cols-2 items-center">
           
           <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6 }}
+            initial={orgLeftInitial}
+            whileInView={orgLeftWhileInView}
+            viewport={orgViewport}
+            transition={orgLeftTransition}
           >
             <span className="text-primary font-bold tracking-wider uppercase text-sm">For Organizers</span>
             <h2 className="mt-2 text-3xl font-heading font-bold text-foreground tracking-tight uppercase">Run Tournaments Like A Pro</h2>
@@ -55,9 +65,9 @@ export function ForOrganizers() {
                 return (
                   <motion.div 
                     key={feature.title} 
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-50px" }}
+                    initial={orgItemInitial}
+                    whileInView={orgItemWhileInView}
+                    viewport={orgViewport}
                     transition={{ duration: 0.4, delay: idx * 0.1 }}
                     className="flex gap-4"
                   >
@@ -77,16 +87,17 @@ export function ForOrganizers() {
           </motion.div>
 
           <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6 }}
+            initial={orgRightInitial}
+            whileInView={orgRightWhileInView}
+            viewport={orgViewport}
+            transition={orgRightTransition}
             className="relative mx-auto w-full max-w-lg lg:max-w-none"
           >
             {/* The ONLY floating element on the page, subtle 25% reduction in typical float intensity */}
             <motion.div 
-              animate={{ y: [0, -10, 0] }}
-              transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+              whileInView={{ y: [0, -10, 0] }}
+              viewport={{ once: true }}
+              transition={{ duration: 6, ease: "easeInOut" }}
               className="rounded-xl border border-border bg-background p-2 shadow-2xl relative"
             >
               {/* Subtle background glow */}

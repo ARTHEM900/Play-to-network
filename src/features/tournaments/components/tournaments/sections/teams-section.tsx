@@ -17,35 +17,35 @@ export async function TeamsSection({ tournamentId }: { tournamentId?: string }) 
       if (regs && regs.length > 0) {
         const teamIds = regs.map(r => r.team_id).filter(Boolean)
         
-        if (teamIds.length > 0) {
-          // Fetch teams
-          const { data: dbTeams } = await supabase
-            .from('teams')
-            .select('*')
-            .in('id', teamIds)
+          if (teamIds.length > 0) {
+            // Fetch teams and player counts in parallel
+            const [{ data: dbTeams }, { data: playersData }] = await Promise.all([
+              supabase
+                .from('teams')
+                .select('*')
+                .in('id', teamIds),
+              supabase
+                .from('players')
+                .select('team_id')
+                .in('team_id', teamIds)
+            ])
 
-          if (dbTeams && dbTeams.length > 0) {
-            // Query roster count
-            const { data: playersData } = await supabase
-              .from('players')
-              .select('team_id')
-              .in('team_id', teamIds)
+            if (dbTeams && dbTeams.length > 0) {
+              const playersCountMap = new Map()
+              playersData?.forEach(p => {
+                playersCountMap.set(p.team_id, (playersCountMap.get(p.team_id) || 0) + 1)
+              })
 
-            const playersCountMap = new Map()
-            playersData?.forEach(p => {
-              playersCountMap.set(p.team_id, (playersCountMap.get(p.team_id) || 0) + 1)
-            })
-
-            teams = dbTeams.map((t: any, idx: number) => ({
-              id: t.id,
-              name: t.team_name,
-              captain: t.captain_name || "",
-              players: playersCountMap.get(t.id) || 1,
-              group: idx < 4 ? "A" : idx < 8 ? "B" : idx < 12 ? "C" : "D"
-            }))
+              teams = dbTeams.map((t: any, idx: number) => ({
+                id: t.id,
+                name: t.team_name,
+                captain: t.captain_name || "",
+                players: playersCountMap.get(t.id) || 1,
+                group: idx < 4 ? "A" : idx < 8 ? "B" : idx < 12 ? "C" : "D"
+              }))
+            }
           }
         }
-      }
     } catch (error) {
       console.error("Failed to load live teams from Supabase:", error)
       teams = []

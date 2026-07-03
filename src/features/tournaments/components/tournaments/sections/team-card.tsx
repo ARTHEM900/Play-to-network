@@ -1,3 +1,5 @@
+import { memo } from "react"
+
 export interface TeamCardProps {
   id: string
   name: string
@@ -6,7 +8,7 @@ export interface TeamCardProps {
   group?: string
 }
 
-export function TeamCard({ name, captain, players, group }: TeamCardProps) {
+export const TeamCard = memo(function TeamCard({ name, captain, players, group }: TeamCardProps) {
   return (
     <div className="bg-[#0A0A0A]/40 backdrop-blur-md border border-white/5 rounded-xl p-5 hover:border-white/10 hover:bg-[#0A0A0A]/60 transition-all cursor-pointer group flex flex-col items-center text-center">
       
@@ -34,4 +36,4 @@ export function TeamCard({ name, captain, players, group }: TeamCardProps) {
       </div>
     </div>
   )
-}
+})

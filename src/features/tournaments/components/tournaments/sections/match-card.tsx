@@ -1,3 +1,4 @@
+import { memo } from "react"
 import { Activity, Clock } from "lucide-react"
 import Link from "next/link"
 
@@ -11,9 +12,9 @@ export interface MatchCardProps {
   group?: string
 }
 
-export function MatchCard({ id, team1, team2, time, date, status, group }: MatchCardProps) {
+export const MatchCard = memo(function MatchCard({ id, team1, team2, time, date, status, group }: MatchCardProps) {
   return (
-    <Link href={`/matches/${id}`} className="bg-[#0A0A0A]/40 backdrop-blur-md border border-white/5 rounded-xl p-4 hover:border-white/10 hover:bg-[#0A0A0A]/60 transition-all cursor-pointer group flex flex-col">
+    <Link href={`/matches/${id}`} prefetch={true} className="bg-[#0A0A0A]/40 backdrop-blur-md border border-white/5 rounded-xl p-4 hover:border-white/10 hover:bg-[#0A0A0A]/60 transition-all cursor-pointer group flex flex-col">
       
       {/* Header */}
       <div className="flex justify-between items-center mb-4 pb-3 border-b border-white/5">
@@ -83,4 +84,4 @@ export function MatchCard({ id, team1, team2, time, date, status, group }: Match
 
     </Link>
   )
-}
+})

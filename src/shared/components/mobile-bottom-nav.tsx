@@ -1,6 +1,7 @@
 "use client"
 
 import { usePathname } from "next/navigation"
+import Link from "next/link"
 import { Home, Calendar, Radio, Shield, User } from "lucide-react"
 import { cn } from "@/shared/utils/utils"
 import { useMediaQuery } from "@/shared/hooks/useMediaQuery"
@@ -29,15 +30,16 @@ export function MobileBottomNav() {
           const Icon = item.icon
 
           return (
-            <a
+            <Link
               key={item.label}
               href={item.href}
               className={cn(
-                "flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors min-h-[44px] justify-center relative",
+                "flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors min-h-[44px] justify-center relative press-scale",
                 isActive
                   ? "text-primary"
                   : "text-white/40 hover:text-white/70",
               )}
+              prefetch={true}
             >
               <Icon
                 className={cn(
@@ -51,7 +53,7 @@ export function MobileBottomNav() {
               {isActive && (
                 <div className="w-1 h-1 rounded-full bg-primary mt-0.5" />
               )}
-            </a>
+            </Link>
           )
         })}
       </div>

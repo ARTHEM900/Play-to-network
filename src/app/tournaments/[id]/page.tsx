@@ -1,5 +1,6 @@
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
+import { Suspense } from "react"
 import { PtnNavbar } from "@/shared/components/ptn-navbar"
 import { PtnFooter } from "@/shared/components/ptn-footer"
 import { TournamentHero } from "@/features/tournaments/components/tournaments/tournament-hero"
@@ -103,7 +104,9 @@ export default async function TournamentPage({
       <TournamentStatusBanner currentStage={tournamentData.current_stage || "Groups"} />
 
       {/* Navigation Tabs (Sticky) */}
-      <TournamentTabs tournamentId={id} />
+      <Suspense fallback={<div className="w-full h-12 bg-[#050505]" />}>
+        <TournamentTabs tournamentId={id} />
+      </Suspense>
 
       {/* Dynamic Content Area */}
       <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-8 py-12 min-h-[500px]">

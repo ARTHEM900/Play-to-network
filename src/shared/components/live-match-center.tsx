@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Radio, ChevronRight, Clock, CheckCircle2 } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { cn } from "@/shared/utils/utils"
@@ -236,13 +236,6 @@ function MatchRow({ match }: { match: Match }) {
 
 export function LiveMatchCenter() {
   const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("live")
-  const [tick, setTick] = useState(0)
-
-  // subtle "live" pulse to make scores feel real-time
-  useEffect(() => {
-    const id = setInterval(() => setTick((t) => t + 1), 8000)
-    return () => clearInterval(id)
-  }, [])
 
   const matches =
     tab === "live"
@@ -317,7 +310,7 @@ export function LiveMatchCenter() {
           {/* Match list */}
           <div className="grid grid-cols-1 gap-3 p-4 sm:p-5 lg:grid-cols-3">
             {matches.map((m) => (
-              <MatchRow key={`${m.id}-${tick}`} match={m} />
+              <MatchRow key={m.id} match={m} />
             ))}
           </div>
 

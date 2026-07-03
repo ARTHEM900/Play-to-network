@@ -5,6 +5,20 @@ import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 
+const liveViewport = { once: true, margin: "-50px" }
+const liveContainerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+}
+const liveCardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+}
+const liveCardWhileHover = { scale: 1.02 }
+
 export function LiveEvents() {
   const [liveMatches, setLiveMatches] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -68,24 +82,15 @@ export function LiveEvents() {
           <motion.div 
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 1,
-                transition: { staggerChildren: 0.1 }
-              }
-            }}
+            viewport={liveViewport}
+            variants={liveContainerVariants}
             className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
           >
             {liveMatches.map((match) => (
               <motion.div 
                 key={match.id} 
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
-                }}
-                whileHover={{ scale: 1.02 }}
+                variants={liveCardVariants}
+                whileHover={liveCardWhileHover}
                 className="group relative overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/40 shadow-sm"
               >
                 <div className="border-b border-border bg-secondary/40 px-4 py-3 flex items-center justify-between">

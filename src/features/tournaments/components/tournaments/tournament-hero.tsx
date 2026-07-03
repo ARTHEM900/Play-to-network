@@ -87,12 +87,12 @@ export function TournamentHero({
 
         {/* Right Column: CTAs */}
         <div className="flex flex-col sm:flex-row gap-4 shrink-0">
-          <Link href={`/register${tournamentId ? `?tournamentId=${tournamentId}` : ''}`}>
+          <Link href={`/register${tournamentId ? `?tournamentId=${tournamentId}` : ''}`} prefetch={true}>
             <Button size="lg" className="h-14 px-8 text-sm font-bold tracking-wide uppercase bg-primary text-black hover:bg-primary/90 shadow-[0_0_20px_rgba(0,230,118,0.2)] hover:shadow-[0_0_30px_rgba(0,230,118,0.4)] transition-all rounded-md">
               Register Team <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
-          <Link href="#matches">
+          <Link href="#matches" prefetch={true}>
             <Button size="lg" variant="outline" className="h-14 px-8 text-sm font-bold tracking-wide border-white/10 bg-black/60 backdrop-blur-xl hover:bg-white/10 transition-all text-white rounded-md flex items-center">
               <Activity className="mr-2 h-4 w-4 text-primary" />
               View Matches

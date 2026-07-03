@@ -23,27 +23,41 @@ export default function MatchDetailPage() {
   useEffect(() => {
     if (!id) return
 
+    const abortController = new AbortController()
     const supabase = createClient()
+    let intervalId: ReturnType<typeof setInterval>
+
     const fetchMatch = async () => {
+      if (abortController.signal.aborted) return
       try {
         const data = await MatchRepository.getMatchById(supabase, id)
-        if (data) {
-          setMatch(data)
-          setError(false)
-        } else {
-          setError(true)
+        if (!abortController.signal.aborted) {
+          if (data) {
+            setMatch(data)
+            setError(false)
+          } else {
+            setError(true)
+          }
         }
       } catch (err) {
-        console.error("Failed to load match details:", err)
-        setError(true)
+        if (!abortController.signal.aborted) {
+          console.error("Failed to load match details:", err)
+          setError(true)
+        }
       } finally {
-        setLoading(false)
+        if (!abortController.signal.aborted) {
+          setLoading(false)
+        }
       }
     }
 
     fetchMatch()
-    const interval = setInterval(fetchMatch, 15000)
-    return () => clearInterval(interval)
+    intervalId = setInterval(fetchMatch, 15000)
+
+    return () => {
+      abortController.abort()
+      clearInterval(intervalId)
+    }
   }, [id])
 
   const getInitials = (name: string) => {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { ChevronDown, HelpCircle } from "lucide-react"
 
 interface FaqItem {
@@ -41,20 +41,15 @@ export function FaqAccordion({ faqs }: { faqs: FaqItem[] }) {
               </motion.div>
             </button>
             
-            <AnimatePresence>
-              {isOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                >
-                  <div className="p-5 pt-0 text-sm text-white/60 leading-relaxed border-t border-white/5 mt-2">
-                    {faq.answer}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <div
+              className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+            >
+              <div className={`overflow-hidden min-h-0 transition-opacity duration-300 ease-in-out ${isOpen ? "opacity-100" : "opacity-0"}`}>
+                <div className="p-5 pt-0 text-sm text-white/60 leading-relaxed border-t border-white/5 mt-2">
+                  {faq.answer}
+                </div>
+              </div>
+            </div>
           </div>
         )
       })}

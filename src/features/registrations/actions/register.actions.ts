@@ -146,14 +146,15 @@ export async function registerPlayerAction(
         teamForm.player4
       ].filter(Boolean)
 
-      console.log(`[REGISTER] Step: Creating ${playersToCreate.length} player records`)
-      for (const pName of playersToCreate) {
-        await PlayerRepository.createPlayer(supabase, {
+      console.log(`[REGISTER] Step: Creating ${playersToCreate.length} player records (batched)`)
+      const { error: playersError } = await supabase
+        .from('players')
+        .insert(playersToCreate.map(pName => ({
           player_name: pName,
           team_id: teamId,
           user_id: userId
-        })
-      }
+        })))
+      if (playersError) throw playersError
     } else if (regType === 'individual' && indForm) {
       // Create solo team record
       const team = await TeamRepository.createTeam(supabase, {

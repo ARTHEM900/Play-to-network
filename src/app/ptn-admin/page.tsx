@@ -400,12 +400,12 @@ export default function PtnAdminDashboard() {
             </div>
             
             <div className="flex items-center gap-3">
-              <Link href="/admin/live">
+              <Link href="/admin/live" prefetch={true}>
                 <Button size="sm" className="bg-primary hover:bg-primary-light text-black font-extrabold rounded-lg text-xxs tracking-wider uppercase h-9 px-4">
                   Manage Live Matches
                 </Button>
               </Link>
-              <Link href="/admin/live">
+              <Link href="/admin/live" prefetch={true}>
                 <Button size="sm" variant="outline" className="border-white/10 hover:border-white/20 rounded-lg text-xxs tracking-wider uppercase h-9 px-4">
                   Create Match
                 </Button>

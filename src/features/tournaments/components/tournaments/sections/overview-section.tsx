@@ -63,23 +63,22 @@ export async function OverviewSection({ tournamentId }: { tournamentId?: string 
         } catch(e) {}
         brochureUrl = tournament.brochure_url || "";
 
-        const matches = await MatchRepository.getMatchesByTournament(supabase, tournamentId)
-        
-        // Count registered teams
-        const { count } = await supabase
-          .from('registrations')
-          .select('*', { count: 'exact', head: true })
-          .eq('tournament_id', tournamentId)
-
-        const { data: regsData } = await supabase
-          .from('registrations')
-          .select(`
-            registration_status,
-            teams (
-              team_name
-            )
-          `)
-          .eq('tournament_id', tournamentId)
+        const [matches, { count }, { data: regsData }] = await Promise.all([
+          MatchRepository.getMatchesByTournament(supabase, tournamentId),
+          supabase
+            .from('registrations')
+            .select('*', { count: 'exact', head: true })
+            .eq('tournament_id', tournamentId),
+          supabase
+            .from('registrations')
+            .select(`
+              registration_status,
+              teams (
+                team_name
+              )
+            `)
+            .eq('tournament_id', tournamentId)
+        ])
           
         regsData?.forEach((r: any) => {
           const tName = r.teams?.team_name || ''
@@ -286,7 +285,7 @@ export async function OverviewSection({ tournamentId }: { tournamentId?: string 
             <p><strong className="text-white">National Team Selection:</strong> Teams choose national representations during registration, allocated first-come, first-served.</p>
           </div>
           <div className="pt-2 flex flex-col sm:flex-row gap-3">
-            <Link href={`/register${tournamentId ? `?tournamentId=${tournamentId}` : ''}`} className="flex-1">
+            <Link href={`/register${tournamentId ? `?tournamentId=${tournamentId}` : ''}`} prefetch={true} className="flex-1">
               <Button className="w-full h-12 bg-primary text-black font-bold uppercase tracking-wider hover:bg-primary/90 transition-all rounded-md">
                 Register Now
               </Button>

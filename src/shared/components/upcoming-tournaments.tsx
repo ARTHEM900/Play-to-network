@@ -104,7 +104,7 @@ export function UpcomingTournaments() {
                   <span className="text-xs font-medium text-muted-foreground">
                     {t.slots}
                   </span>
-                  <Link href="/register">
+                  <Link href="/register" prefetch={true}>
                     <Button
                       size="sm"
                       className="bg-primary font-semibold text-primary-foreground hover:bg-primary/90"

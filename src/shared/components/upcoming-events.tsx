@@ -7,6 +7,20 @@ import { useRef, useEffect, useState } from "react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 
+const upcomingViewport = { once: true, margin: "-50px" }
+const upcomingContainerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+}
+const upcomingCardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+}
+const upcomingCardWhileHover = { y: -4, scale: 1.01 }
+
 // Smooth count-up component
 function CountUp({ to }: { to: number }) {
   const ref = useRef<HTMLSpanElement>(null)
@@ -86,7 +100,7 @@ export function UpcomingEvents() {
             <h2 className="text-3xl font-heading font-bold text-foreground tracking-tight uppercase">Upcoming Events</h2>
             <p className="text-muted-foreground mt-2 text-sm sm:text-base">Register your team for the next big competition.</p>
           </div>
-          <Link href="/events">
+          <Link href="/events" prefetch={true}>
             <Button variant="outline" className="hidden sm:flex border-border hover:bg-secondary">Browse All Events</Button>
           </Link>
         </div>
@@ -103,24 +117,15 @@ export function UpcomingEvents() {
           <motion.div 
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 1,
-                transition: { staggerChildren: 0.1 }
-              }
-            }}
+            viewport={upcomingViewport}
+            variants={upcomingContainerVariants}
             className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
           >
             {tournaments.map((t) => (
               <motion.div 
                 key={t.id} 
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
-                }}
-                whileHover={{ y: -4, scale: 1.01 }}
+                variants={upcomingCardVariants}
+                whileHover={upcomingCardWhileHover}
                 className="flex flex-col overflow-hidden rounded-xl border border-border bg-background transition-all group relative"
               >
                 {/* Subtle Spotlight Glow */}
@@ -162,7 +167,7 @@ export function UpcomingEvents() {
                   </div>
                 </div>
                 <div className="p-4 border-t border-border bg-secondary/20 relative z-10">
-                  <Link href={`/tournaments/${t.id}`}>
+                  <Link href={`/tournaments/${t.id}`} prefetch={true}>
                     <Button className="w-full font-semibold shadow-sm transition-shadow group-hover:shadow-[0_0_15px_rgba(0,230,118,0.15)]" variant={t.status === 'Closed' ? 'secondary' : 'default'} disabled={t.status === 'Closed'}>
                       {t.status === 'Closed' ? 'Registration Full' : 'Register Now'}
                     </Button>
@@ -172,7 +177,7 @@ export function UpcomingEvents() {
             ))}
           </motion.div>
         )}
-        <Link href="/events">
+        <Link href="/events" prefetch={true}>
           <Button variant="outline" className="w-full mt-6 sm:hidden border-border hover:bg-secondary">Browse All Events</Button>
         </Link>
       </div>

@@ -347,7 +347,7 @@ function RegisterSuccessContent() {
         transition={{ duration: 0.4, delay: 0.3 }}
         className="w-full flex flex-col sm:flex-row gap-4 mt-10 justify-center"
       >
-        <Link href="/" className="w-full sm:w-1/3">
+        <Link href="/" prefetch={true} className="w-full sm:w-1/3">
           <Button 
             variant="outline"
             className="w-full border-white/10 hover:border-white/20 bg-[#0B0B0B]/40 hover:bg-white/5 text-white/90 font-bold h-12 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300"
@@ -357,7 +357,7 @@ function RegisterSuccessContent() {
           </Button>
         </Link>
 
-        <Link href={`/tournaments/${tournamentId}`} className="w-full sm:w-1/3">
+        <Link href={`/tournaments/${tournamentId}`} prefetch={true} className="w-full sm:w-1/3">
           <Button 
             className="w-full bg-primary hover:bg-primary/95 text-black font-bold h-12 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_4px_15px_rgba(0,230,118,0.15)] transition-all duration-300"
           >
@@ -366,7 +366,7 @@ function RegisterSuccessContent() {
           </Button>
         </Link>
 
-        <Link href="/dashboard" className="w-full sm:w-1/3">
+        <Link href="/dashboard" prefetch={true} className="w-full sm:w-1/3">
           <Button 
             variant="outline"
             className="w-full border-white/10 hover:border-white/20 bg-[#0B0B0B]/45 hover:bg-white/5 text-white/90 font-bold h-12 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300"

@@ -13,7 +13,7 @@ export function MatchHeader({ match }: { match?: any }) {
   return (
     <div className="w-full flex flex-col md:flex-row items-start md:items-center justify-between border-b border-white/5 pb-6 mb-8 gap-4">
       <div className="flex flex-col gap-3">
-        <Link href={`/tournaments/${match?.tournament_id || "e1"}`} className="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-2 hover:text-white transition-colors w-fit">
+        <Link href={`/tournaments/${match?.tournament_id || "e1"}`} prefetch={true} className="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-2 hover:text-white transition-colors w-fit">
           <ArrowLeft className="w-4 h-4" /> Back to Tournament
         </Link>
         <div className="flex items-center gap-3 flex-wrap">

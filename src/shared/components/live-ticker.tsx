@@ -9,21 +9,30 @@ export function LiveTicker() {
   const [liveMatches, setLiveMatches] = useState<any[]>([])
 
   useEffect(() => {
+    const abortController = new AbortController()
     const supabase = createClient()
     const fetchLive = async () => {
+      if (abortController.signal.aborted) return
       try {
         const { data } = await supabase
           .from('matches')
           .select('*, tournaments(name)')
           .eq('status', 'Live')
-        if (data) {
+        if (!abortController.signal.aborted && data) {
           setLiveMatches(data)
         }
       } catch (err) {
-        console.error("Failed to load live matches for ticker:", err)
+        if (!abortController.signal.aborted) {
+          console.error("Failed to load live matches for ticker:", err)
+        }
       }
     }
     fetchLive()
+    const interval = setInterval(fetchLive, 30000)
+    return () => {
+      abortController.abort()
+      clearInterval(interval)
+    }
   }, [])
 
   return (

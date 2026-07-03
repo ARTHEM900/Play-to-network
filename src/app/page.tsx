@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic"
 import { PtnNavbar } from "@/shared/components/ptn-navbar"
 import { PtnHero } from "@/shared/components/ptn-hero"
-import { CinematicLoader } from "@/shared/components/cinematic-loader"
+const CinematicLoader = dynamic(() => import("@/shared/components/cinematic-loader").then(m => m.CinematicLoader))
 
 const LiveTicker = dynamic(() => import("@/shared/components/live-ticker").then(m => m.LiveTicker))
 const SportsCategories = dynamic(() => import("@/shared/components/sports-categories").then(m => m.SportsCategories))

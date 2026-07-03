@@ -240,39 +240,33 @@ function RegisterPageClient() {
   // Handle submit registration
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    // Double check screenshot
+
+    // Prevent double submission
+    if (isSubmitting) return
+
+    // Validate before showing loading state
+    const name = regType === "team" ? teamForm.teamName : indForm.fullName
+    const phone = regType === "team" ? teamForm.captainPhone : indForm.phone
+
     if (!screenshot) {
       setFileError("Please upload payment confirmation screenshot to complete registration.")
-      // Scroll to uploader
       document.getElementById("payment-section")?.scrollIntoView({ behavior: "smooth" })
       return
     }
 
-    // Double check declaration
     if (!declaration) return
 
-    setIsSubmitting(true)
-    setFileError(null)
-
-    const name = regType === "team" ? teamForm.teamName : indForm.fullName
-    const phone = regType === "team" ? teamForm.captainPhone : indForm.phone
-
-    // Validation
     if (!name.trim()) {
       setFileError("Please enter a valid Name.")
-      setIsSubmitting(false)
       return
     }
 
     const phoneRegex = /^[6-9]\d{9}$/
     if (!phone.trim() || !phoneRegex.test(phone)) {
       setFileError("Please enter a valid 10-digit Indian mobile number.")
-      setIsSubmitting(false)
       return
     }
 
-    // Duplicate player name check (team only)
     if (regType === "team") {
       const playerNames = [
         teamForm.captainName.trim().toLowerCase(),
@@ -284,10 +278,13 @@ function RegisterPageClient() {
       const uniqueNames = new Set(playerNames)
       if (uniqueNames.size !== playerNames.length) {
         setFileError("All 5 player names must be unique. Please check for duplicate entries.")
-        setIsSubmitting(false)
         return
       }
     }
+
+    // All validation passed — show loading state immediately
+    setIsSubmitting(true)
+    setFileError(null)
 
     if (config.useLiveRegistration) {
       try {

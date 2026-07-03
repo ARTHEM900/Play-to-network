@@ -5,6 +5,23 @@ import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 
+const headerInitial = { opacity: 0, y: 20 }
+const headerWhileInView = { opacity: 1, y: 0 }
+const headerViewport = { once: true, margin: "-50px" }
+const headerTransition = { duration: 0.6 }
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+}
+const cardVariants = {
+  hidden: { opacity: 0, scale: 0.98 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.4, ease: "easeOut" } }
+}
+const cardWhileHover = { scale: 1.01 }
+
 export function RecentResults() {
   const [results, setResults] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -44,10 +61,10 @@ export function RecentResults() {
     <section className="py-24 bg-background">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.6 }}
+          initial={headerInitial}
+          whileInView={headerWhileInView}
+          viewport={headerViewport}
+          transition={headerTransition}
           className="text-center mb-12"
         >
           <h2 className="text-3xl font-heading font-bold text-foreground tracking-tight uppercase">Recent Results</h2>
@@ -66,24 +83,15 @@ export function RecentResults() {
           <motion.div 
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 1,
-                transition: { staggerChildren: 0.1 }
-              }
-            }}
+            viewport={headerViewport}
+            variants={containerVariants}
             className="space-y-4"
           >
             {results.map((result) => (
               <motion.div 
                 key={result.id} 
-                variants={{
-                  hidden: { opacity: 0, scale: 0.98 },
-                  visible: { opacity: 1, scale: 1, transition: { duration: 0.4, ease: "easeOut" } }
-                }}
-                whileHover={{ scale: 1.01, backgroundColor: "var(--card)" }}
+                variants={cardVariants}
+                whileHover={cardWhileHover}
                 className="flex flex-col sm:flex-row items-center justify-between p-4 sm:p-6 rounded-lg border border-border bg-card/50 transition-colors"
               >
                 <div className="flex w-full sm:w-1/3 flex-col items-center sm:items-start mb-4 sm:mb-0">

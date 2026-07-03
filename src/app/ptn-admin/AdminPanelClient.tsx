@@ -81,6 +81,7 @@ export default function AdminPanelClient() {
     setTimeout(() => setToastMessage(null), 4000)
   }
 
+  const [processingRows, setProcessingRows] = useState<Record<string, boolean>>({})
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -150,15 +151,23 @@ export default function AdminPanelClient() {
   }, [])
 
   const handleUpdateStatus = async (id: string, newStatus: "Approved" | "Pending" | "Rejected") => {
+    if (processingRows[id]) return
+    setProcessingRows(prev => ({ ...prev, [id]: true }))
+
     const reg = registrations.find(r => r.id === id)
     const dbId = reg?.rawId || id
 
     let rejectionReason: string | undefined = undefined
     if (newStatus === "Rejected") {
       const val = prompt("Enter rejection reason (optional):")
-      if (val === null) return
+      if (val === null) { setProcessingRows(prev => ({ ...prev, [id]: false })); return }
       rejectionReason = val || undefined
     }
+
+    // Optimistic update
+    setRegistrations(prev =>
+      prev.map(r => r.id === id ? { ...r, status: newStatus } : r)
+    )
 
     try {
       const result = await updateRegistrationStatusAction(dbId, newStatus, rejectionReason)
@@ -185,31 +194,46 @@ export default function AdminPanelClient() {
         }
       }
     } catch (error: any) {
+      // Revert optimistic update on failure
+      setRegistrations(prev =>
+        prev.map(r => r.id === id ? reg || r : r)
+      )
       console.error("Failed to update status in database:", error)
       showToast(error.message || "Failed to update status in database", "error")
+      setProcessingRows(prev => ({ ...prev, [id]: false }))
       return
     }
+    setProcessingRows(prev => ({ ...prev, [id]: false }))
     showToast(`Registration ID ${id} status updated to ${newStatus}`, newStatus === "Approved" ? "success" : newStatus === "Rejected" ? "error" : "info")
   }
 
   const handleDeleteRegistration = async (id: string) => {
+    if (processingRows[id]) return
+    setProcessingRows(prev => ({ ...prev, [id]: true }))
+
     const reg = registrations.find(r => r.id === id)
     const dbId = reg?.rawId || id
+
+    // Optimistic delete
+    setRegistrations(prev => prev.filter(r => r.id !== id))
+    setIsConfirmDelete(null)
 
     try {
       const supabase = createClient()
       await RegistrationRepository.deleteRegistration(supabase, dbId)
     } catch (error) {
+      // Revert optimistic delete on failure
+      if (reg) setRegistrations(prev => [...prev, reg])
       console.error("Failed to delete registration in database:", error)
       showToast("Failed to delete record in database", "error")
+      setProcessingRows(prev => ({ ...prev, [id]: false }))
       return
     }
 
-    setRegistrations(prev => prev.filter(r => r.id !== id))
-    setIsConfirmDelete(null)
     if (selectedReg && selectedReg.id === id) {
       setSelectedReg(null)
     }
+    setProcessingRows(prev => ({ ...prev, [id]: false }))
     showToast(`Registration ID ${id} deleted successfully.`, "error")
   }
 
@@ -385,12 +409,12 @@ export default function AdminPanelClient() {
             </div>
             
             <div className="flex items-center gap-3">
-              <Link href="/admin/live">
+              <Link href="/admin/live" prefetch={true}>
                 <Button size="sm" className="bg-primary hover:bg-primary-light text-black font-extrabold rounded-lg text-xxs tracking-wider uppercase h-9 px-4">
                   Manage Live Matches
                 </Button>
               </Link>
-              <Link href="/admin/live">
+              <Link href="/admin/live" prefetch={true}>
                 <Button size="sm" variant="outline" className="border-white/10 hover:border-white/20 rounded-lg text-xxs tracking-wider uppercase h-9 px-4">
                   Create Match
                 </Button>

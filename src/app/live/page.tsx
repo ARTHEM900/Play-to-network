@@ -19,29 +19,57 @@ export default function PublicLivePage() {
   const [error, setError] = useState(false)
 
   useEffect(() => {
+    const abortController = new AbortController()
     const supabase = createClient()
-    const fetchMatches = async () => {
+    let liveIntervalId: ReturnType<typeof setInterval>
+
+    const fetchAllMatches = async () => {
+      if (abortController.signal.aborted) return
       try {
         const [live, upcoming, completed] = await Promise.all([
           MatchRepository.getLiveMatches(supabase),
           MatchRepository.getUpcomingMatches(supabase),
           MatchRepository.getCompletedMatches(supabase)
         ])
-        setLiveMatches(live || [])
-        setUpcomingMatches(upcoming || [])
-        setCompletedMatches(completed || [])
-        setError(false)
+        if (!abortController.signal.aborted) {
+          setLiveMatches(live || [])
+          setUpcomingMatches(upcoming || [])
+          setCompletedMatches(completed || [])
+          setError(false)
+        }
       } catch (err) {
-        console.error("Failed to fetch matches in Live Center:", err)
-        setError(true)
+        if (!abortController.signal.aborted) {
+          console.error("Failed to fetch matches in Live Center:", err)
+          setError(true)
+        }
       } finally {
-        setLoading(false)
+        if (!abortController.signal.aborted) {
+          setLoading(false)
+        }
       }
     }
 
-    fetchMatches()
-    const interval = setInterval(fetchMatches, 15000)
-    return () => clearInterval(interval)
+    const pollLiveOnly = async () => {
+      if (abortController.signal.aborted) return
+      try {
+        const live = await MatchRepository.getLiveMatches(supabase)
+        if (!abortController.signal.aborted) {
+          setLiveMatches(live || [])
+        }
+      } catch (err) {
+        if (!abortController.signal.aborted) {
+          console.error("Failed to poll live matches:", err)
+        }
+      }
+    }
+
+    fetchAllMatches()
+    liveIntervalId = setInterval(pollLiveOnly, 15000)
+
+    return () => {
+      abortController.abort()
+      clearInterval(liveIntervalId)
+    }
   }, [])
 
   const allEmpty = liveMatches.length === 0 && upcomingMatches.length === 0 && completedMatches.length === 0
@@ -269,6 +297,7 @@ function MatchCard({ match, getInitials, isLive = false }: { match: any; getInit
 
         <Link
           href={`/live/${match.id}`}
+          prefetch={true}
           className="flex items-center gap-1 text-primary hover:text-primary-light font-bold transition-colors uppercase tracking-wider"
         >
           <span>Match Info</span>

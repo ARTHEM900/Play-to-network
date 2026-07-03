@@ -16,18 +16,10 @@ export function PtnHero() {
       {/* ---------------------------------------------------- */}
       
       <motion.div 
-        initial={{ scale: 1.1, filter: "brightness(0) blur(4px)" }}
+        initial={{ opacity: 0, scale: 1.1 }}
         animate={{ 
-          scale: [1.1, 1.1, 1.1, 1.1, 1.1, 1.0, 1.0],
-          filter: [
-            "brightness(0) blur(4px)",      // 0.0s: Black
-            "brightness(0.3) blur(2px)",    // 0.5s: Tunnel emerges
-            "brightness(0.6) blur(0px)",    // 1.0s: Lights illuminate
-            "brightness(0.6) blur(0px)",    // 1.5s: Shield appears
-            "brightness(0.6) blur(0px)",    // 2.0s: Wordmark appears
-            "brightness(1) blur(0px)",      // 2.5s - 3.0s: Camera push & brighten
-            "brightness(1) blur(0px)"       // 4.0s: Interactive
-          ]
+          opacity: [0, 0.15, 0.4, 0.6, 0.8, 1, 1],
+          scale: [1.1, 1.1, 1.1, 1.1, 1.1, 1.0, 1.0]
         }}
         transition={{
           duration: 4.0,
@@ -35,6 +27,7 @@ export function PtnHero() {
           ease: "easeInOut"
         }}
         className="absolute inset-0 z-0 pointer-events-none origin-center"
+        style={{ filter: "blur(1px)" }}
       >
         <Image
           src="/stadium_bg.jpg"
@@ -81,7 +74,7 @@ export function PtnHero() {
             </p>
             
             <div className="flex flex-col sm:flex-row flex-wrap gap-4">
-              <Link href="/events">
+              <Link href="/events" prefetch={true}>
                 <Button size="lg" className="h-14 px-8 text-sm font-bold tracking-wide uppercase bg-primary text-black hover:bg-primary/90 shadow-[0_0_20px_rgba(0,230,118,0.3)] hover:shadow-[0_0_40px_rgba(0,230,118,0.5)] transition-all rounded-lg">
                   Explore Events <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>

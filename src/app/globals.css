@@ -443,4 +443,77 @@ img[loading="lazy"] {
   z-index: 40;
 }
 
+/* ============================================ */
+/* INSTANT PRESS FEEDBACK FOR ALL INTERACTIVE   */
+/* ============================================ */
+@media (hover: hover) {
+  .press-scale:active,
+  button:active:not(:disabled):not([disabled]),
+  a:active:not(:disabled):not([disabled]),
+  [role="button"]:active:not(:disabled):not([disabled]) {
+    transform: scale(0.97);
+    transition: transform 0.05s ease-out;
+  }
+}
+
+.press-scale {
+  transition: transform 0.05s ease-out;
+  cursor: pointer;
+}
+
+/* ============================================ */
+/* FOCUS VISIBLE RING FOR KEYBOARD USERS        */
+/* ============================================ */
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ============================================ */
+/* PREVENT TEXT SELECTION ON BUTTONS            */
+/* ============================================ */
+button, a, [role="button"] {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ============================================ */
+/* FADE IN KEYFRAME FOR PAGE TRANSITIONS        */
+/* ============================================ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ============================================ */
+/* MOBILE OPTIMIZATIONS                         */
+/* ============================================ */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+button, a, [role="button"], input, select, textarea {
+  touch-action: manipulation;
+}
+
+body {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Minimum 48px tap targets on mobile */
+@media (max-width: 768px) {
+  button, a, [role="button"], .nav-link, .tap-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
+}
+
+/* GPU-accelerated transforms for motion elements */
+[class*="motion-div"], [class*="press-scale"], .cinematic-loader, .cinematic-logo {
+  will-change: transform, opacity;
+}
+
 /* Force Turbopack Cache Invalidation */

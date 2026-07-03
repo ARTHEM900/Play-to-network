@@ -104,6 +104,9 @@ const DashboardPage = memo(function DashboardPage() {
   const [regSelectedTeam, setRegSelectedTeam] = useState(teams[0]?.id || "")
   const [regSelectedTourney, setRegSelectedTourney] = useState("Delhi Esports League")
 
+  const [isCreatingTeam, setIsCreatingTeam] = useState(false)
+  const [isRegisteringTeam, setIsRegisteringTeam] = useState(false)
+
   interface DashboardRegistration {
     id: string
     registrationNumber: string
@@ -125,7 +128,35 @@ const DashboardPage = memo(function DashboardPage() {
       const { data: { session } } = await supabase.auth.getSession()
       if (session?.user) {
         try {
-          const profileData = await ProfileRepository.getProfileById(supabase, session.user.id)
+          const userId = session.user.id
+
+          // Parallel: profile + teams + registrations (all depend only on user_id)
+          const [profileData, { data: teamsData }, regsResult] = await Promise.all([
+            ProfileRepository.getProfileById(supabase, userId),
+            supabase.from('teams').select('*').eq('user_id', userId),
+            supabase
+              .from('registrations')
+              .select(`
+                id,
+                registration_number,
+                registration_type,
+                payment_status,
+                registration_status,
+                created_at,
+                teams (
+                  team_name
+                ),
+                tournaments (
+                  id,
+                  name,
+                  sport,
+                  status,
+                  start_date
+                )
+              `)
+              .eq('user_id', userId)
+          ])
+
           setProfile({
             name: profileData?.full_name || session.user.email?.split("@")[0] || '',
             email: session.user.email || '',
@@ -135,11 +166,56 @@ const DashboardPage = memo(function DashboardPage() {
               : ''
           })
 
-          // Fetch registrations for the logged-in user via user_id (RLS enforces ownership)
-          const { data: teamsData } = await supabase
-            .from('teams')
-            .select('*')
-            .eq('user_id', session.user.id)
+          const regsData = regsResult.data
+
+          if (regsData) {
+            setRegistrationsList(regsData.map((r: any) => {
+              const tName = r.teams?.team_name || ''
+              const match = tName.match(/\(([^)]+)\)/)
+              const preferredNation = match ? match[1].trim() : null
+
+              let displayStatus = r.registration_status
+              if (r.registration_status === 'Pending') {
+                displayStatus = 'Submitted'
+              } else if (r.registration_status === 'Rejected') {
+                displayStatus = 'Action Required'
+              }
+
+              let displayPaymentStatus = r.payment_status
+              if (r.payment_status === 'Pending') {
+                displayPaymentStatus = 'Pending Verification'
+              } else if (r.payment_status === 'Failed') {
+                displayPaymentStatus = 'Rejected'
+              }
+
+              return {
+                id: r.id,
+                registrationNumber: r.registration_number,
+                type: r.registration_type,
+                paymentStatus: displayPaymentStatus,
+                status: displayStatus,
+                tournamentName: r.tournaments?.name || '',
+                teamName: r.teams?.team_name || '',
+                preferredNation,
+                createdAt: r.created_at ? new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) : ''
+              }
+            }))
+
+            // Populate tournaments
+            const uniqueTourneys = Array.from(new Map(
+              regsData.map((r: any) => r.tournaments).filter(Boolean).map((t: any) => [t.id, t])
+            ).values())
+
+            setTournaments(uniqueTourneys.map((t: any) => ({
+              id: t.id,
+              name: t.name,
+              sport: t.sport,
+              status: t.status === "Registration Open" ? "Active" : "Completed",
+              progress: t.status === "Registration Open" ? 10 : 100,
+              resultSummary: "Registered",
+              nextMatchDate: t.start_date
+            })))
+          }
 
           if (teamsData && teamsData.length > 0) {
             setTeams(teamsData.map((t: any) => ({
@@ -151,87 +227,9 @@ const DashboardPage = memo(function DashboardPage() {
               currentTournament: "Mini FIFA"
             })))
 
-            const teamIds = teamsData.map((t: any) => t.id)
             const teamNames = teamsData.map((t: any) => t.team_name).filter(Boolean)
 
-            let regsData: any[] | null = null
-            try {
-              const result = await supabase
-                .from('registrations')
-                .select(`
-                  id,
-                  registration_number,
-                  registration_type,
-                  payment_status,
-                  registration_status,
-                  created_at,
-                  teams (
-                    team_name
-                  ),
-                  tournaments (
-                    id,
-                    name,
-                    sport,
-                    status,
-                    start_date
-                  )
-                `)
-                .eq('user_id', session.user.id)
-              regsData = result.data
-            } catch (e) {
-              console.error("Failed to fetch registrations:", e)
-            }
-
-            if (regsData) {
-              setRegistrationsList(regsData.map((r: any) => {
-                const tName = r.teams?.team_name || ''
-                const match = tName.match(/\(([^)]+)\)/)
-                const preferredNation = match ? match[1].trim() : null
-
-                let displayStatus = r.registration_status
-                if (r.registration_status === 'Pending') {
-                  displayStatus = 'Submitted'
-                } else if (r.registration_status === 'Rejected') {
-                  displayStatus = 'Action Required'
-                }
-
-                let displayPaymentStatus = r.payment_status
-                if (r.payment_status === 'Pending') {
-                  displayPaymentStatus = 'Pending Verification'
-                } else if (r.payment_status === 'Failed') {
-                  displayPaymentStatus = 'Rejected'
-                }
-
-                return {
-                  id: r.id,
-                  registrationNumber: r.registration_number,
-                  type: r.registration_type,
-                  paymentStatus: displayPaymentStatus,
-                  status: displayStatus,
-                  tournamentName: r.tournaments?.name || '',
-                  teamName: r.teams?.team_name || '',
-                  preferredNation,
-                  createdAt: r.created_at ? new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) : ''
-                }
-              }))
-
-              // Populate tournaments
-              const uniqueTourneys = Array.from(new Map(
-                regsData.map((r: any) => r.tournaments).filter(Boolean).map((t: any) => [t.id, t])
-              ).values())
-
-              setTournaments(uniqueTourneys.map((t: any) => ({
-                id: t.id,
-                name: t.name,
-                sport: t.sport,
-                status: t.status === "Registration Open" ? "Active" : "Completed",
-                progress: t.status === "Registration Open" ? 10 : 100,
-                resultSummary: "Registered",
-                nextMatchDate: t.start_date
-              })))
-            }
-
-            // Fetch matches
+            // Fetch matches in parallel with other processing
             const { data: allMatches } = await supabase
               .from('matches')
               .select('*, tournaments(name)')
@@ -272,7 +270,9 @@ const DashboardPage = memo(function DashboardPage() {
   // Handle Team Creation
   const handleCreateTeamSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault()
-    if (!newTeamName.trim()) return
+    if (!newTeamName.trim() || isCreatingTeam) return
+
+    setIsCreatingTeam(true)
 
     const gradients = [
       "from-emerald-500/20 to-green-500/20 border-emerald-500/30",
@@ -329,14 +329,18 @@ const DashboardPage = memo(function DashboardPage() {
     setNewTeamName("")
     setNewTeamCaptain(true)
     setNewTeamTourney("None")
+    setIsCreatingTeam(false)
     triggerToast(`Team "${newTeamName}" created successfully!`)
-  }, [newTeamName, newTeamCaptain, newTeamTourney])
+  }, [newTeamName, newTeamCaptain, newTeamTourney, isCreatingTeam])
 
   // Handle Team Registration
   const handleRegisterTeamSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault()
+    if (isRegisteringTeam) return
     const targetTeam = teams.find(t => t.id === regSelectedTeam)
     if (!targetTeam) return
+
+    setIsRegisteringTeam(true)
 
     // Update team tournament status
     setTeams(prev => prev.map(t => {
@@ -376,8 +380,9 @@ const DashboardPage = memo(function DashboardPage() {
     setNotifications(prev => [newNotification, ...prev])
 
     setShowRegisterTeam(false)
+    setIsRegisteringTeam(false)
     triggerToast(`Successfully registered ${targetTeam.name} for ${regSelectedTourney}!`)
-  }, [teams, regSelectedTeam, regSelectedTourney])
+  }, [teams, regSelectedTeam, regSelectedTourney, isRegisteringTeam])
 
   // Mark all notifications as read
   const markAllNotificationsRead = () => {
@@ -583,7 +588,7 @@ const DashboardPage = memo(function DashboardPage() {
                   <p className="text-sm text-white/40 max-w-md mx-auto mb-5">
                     You haven't registered for any tournaments yet. Browse upcoming events and join the competition.
                   </p>
-                  <Link href="/register">
+                  <Link href="/register" prefetch={true}>
                     <Button className="bg-primary text-black font-bold hover:bg-primary/90 rounded-lg text-xs uppercase tracking-wider">
                       Register for a Tournament
                     </Button>
@@ -787,7 +792,7 @@ const DashboardPage = memo(function DashboardPage() {
                     </div>
 
                     <div className="shrink-0 flex items-center">
-                      <Link href={`/tournaments/${t.id}`}>
+                      <Link href={`/tournaments/${t.id}`} prefetch={true}>
                         <Button 
                           variant="outline" 
                           className="border-white/10 bg-black/20 hover:bg-black/60 hover:border-white/20 text-white rounded-lg text-xs font-bold uppercase tracking-widest h-10 px-4 group"
@@ -834,7 +839,7 @@ const DashboardPage = memo(function DashboardPage() {
                   <span className="text-[11px] font-bold text-white uppercase tracking-wider group-hover:text-primary mt-2">Create Team</span>
                 </button>
 
-                <Link href="/events" className="w-full block">
+                <Link href="/events" prefetch={true} className="w-full block">
                   <div className="p-4 rounded-xl border border-white/5 bg-[#0A0A0A]/40 hover:bg-[#0A0A0A]/60 hover:border-primary/30 transition-all text-left flex flex-col justify-between min-h-[96px] group cursor-pointer h-full">
                     <Calendar className="w-5 h-5 text-primary" />
                     <span className="text-[11px] font-bold text-white uppercase tracking-wider group-hover:text-primary mt-2">Browse Events</span>
@@ -879,7 +884,7 @@ const DashboardPage = memo(function DashboardPage() {
 
                     <div className="flex justify-between items-center mt-3 pt-2 border-t border-white/5 text-[9px] text-white/40">
                       <span>{m.date}</span>
-                      <Link href={`/matches/${m.id}`} className="text-primary font-bold hover:underline flex items-center gap-0.5">
+                      <Link href={`/matches/${m.id}`} prefetch={true} className="text-primary font-bold hover:underline flex items-center gap-0.5">
                         Match Center <ArrowRight className="w-3 h-3" />
                       </Link>
                     </div>
@@ -1023,9 +1028,10 @@ const DashboardPage = memo(function DashboardPage() {
                   </Button>
                   <Button 
                     type="submit" 
-                    className="flex-1 bg-primary text-black hover:bg-primary/90 font-bold"
+                    disabled={isCreatingTeam}
+                    className="flex-1 bg-primary text-black hover:bg-primary/90 font-bold disabled:opacity-50"
                   >
-                    Create Squad
+                    {isCreatingTeam ? "Creating..." : "Create Squad"}
                   </Button>
                 </div>
               </form>
@@ -1116,9 +1122,10 @@ const DashboardPage = memo(function DashboardPage() {
                   </Button>
                   <Button 
                     type="submit" 
-                    className="flex-1 bg-primary text-black hover:bg-primary/90 font-bold"
+                    disabled={isRegisteringTeam}
+                    className="flex-1 bg-primary text-black hover:bg-primary/90 font-bold disabled:opacity-50"
                   >
-                    Confirm Entry
+                    {isRegisteringTeam ? "Registering..." : "Confirm Entry"}
                   </Button>
                 </div>
               </form>

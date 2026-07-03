@@ -1,12 +1,14 @@
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
+import dynamic from "next/dynamic"
 import { PtnNavbar } from "@/shared/components/ptn-navbar"
 import { PtnFooter } from "@/shared/components/ptn-footer"
 import { FeaturedEvent } from "@/features/tournaments/components/events/featured-event"
 import { EventsStats } from "@/features/tournaments/components/events/events-stats"
-import { EventsFilter } from "@/features/tournaments/components/events/events-filter"
-import { EventsTabs } from "@/features/tournaments/components/events/events-tabs"
 import { EventCard, EventCardProps } from "@/features/tournaments/components/events/event-card"
+
+const EventsFilter = dynamic(() => import("@/features/tournaments/components/events/events-filter").then(m => m.EventsFilter))
+const EventsTabs = dynamic(() => import("@/features/tournaments/components/events/events-tabs").then(m => m.EventsTabs))
 import { Trophy } from "lucide-react"
 
 import { createClient } from "@/lib/supabase/server"

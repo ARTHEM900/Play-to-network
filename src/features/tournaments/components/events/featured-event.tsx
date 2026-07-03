@@ -100,14 +100,14 @@ export function FeaturedEvent({ event }: FeaturedEventProps) {
 
           <div className="flex items-center gap-4">
             {data.id !== "default" ? (
-              <Link href={`/tournaments/${data.id}`}>
+              <Link href={`/tournaments/${data.id}`} prefetch={true}>
                 <Button size="lg" className="h-12 px-8 text-sm font-bold tracking-wide uppercase bg-primary text-black hover:bg-primary/90 shadow-[0_0_20px_rgba(0,230,118,0.2)] hover:shadow-[0_0_30px_rgba(0,230,118,0.4)] transition-all rounded-md">
                   Register / Details <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
             ) : (
               <>
-                <Link href="/register">
+                <Link href="/register" prefetch={true}>
                   <Button size="lg" className="h-12 px-8 text-sm font-bold tracking-wide uppercase bg-primary text-black hover:bg-primary/90 shadow-[0_0_20px_rgba(0,230,118,0.2)] hover:shadow-[0_0_30px_rgba(0,230,118,0.4)] transition-all rounded-md">
                     Register Team <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>

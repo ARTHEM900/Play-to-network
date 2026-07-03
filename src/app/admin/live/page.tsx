@@ -29,6 +29,7 @@ function AdminLiveCenter() {
   const [teams, setTeams] = useState<any[]>([])
   const [tournaments, setTournaments] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [isProcessing, setIsProcessing] = useState<Record<string, boolean>>({})
   
   // Modals / forms state
   const [selectedMatch, setSelectedMatch] = useState<any>(null)
@@ -135,8 +136,11 @@ function AdminLiveCenter() {
 
   // Handle Match Delete
   const handleDelete = useCallback(async (id: string) => {
+    if (isProcessing[id]) return
     if (!confirm("Are you sure you want to delete this match?")) return
+    setIsProcessing(prev => ({ ...prev, [id]: true }))
     const res = await deleteLiveMatchAction(id)
+    setIsProcessing(prev => ({ ...prev, [id]: false }))
     if (res.success) {
       showToast("Match deleted successfully", "error")
       if (selectedMatch?.id === id) {
@@ -146,81 +150,104 @@ function AdminLiveCenter() {
     } else {
       showToast(res.error || "Failed to delete match", "error")
     }
-  }, [selectedMatch, showToast, refreshData])
+  }, [selectedMatch, showToast, refreshData, isProcessing])
 
   // Control Functions
   const handleStartMatch = useCallback(async (id: string) => {
+    if (isProcessing[id]) return
+    setIsProcessing(prev => ({ ...prev, [id]: true }))
+    showToast("Starting match...", "info")
     const res = await changeLiveMatchStatusAction(id, "Live", 0)
+    setIsProcessing(prev => ({ ...prev, [id]: false }))
     if (res.success) {
-      showToast("Match Started! Status set to Live.", "success")
       refreshData()
     } else {
       showToast(res.error || "Action failed", "error")
     }
-  }, [showToast, refreshData])
+  }, [showToast, refreshData, isProcessing])
 
   const handleHalfTime = useCallback(async (id: string) => {
+    if (isProcessing[id]) return
+    setIsProcessing(prev => ({ ...prev, [id]: true }))
     const res = await changeLiveMatchStatusAction(id, "Live", 45)
+    setIsProcessing(prev => ({ ...prev, [id]: false }))
     if (res.success) {
       showToast("Match set to Half Time.", "info")
       refreshData()
     } else {
       showToast(res.error || "Action failed", "error")
     }
-  }, [showToast, refreshData])
+  }, [showToast, refreshData, isProcessing])
 
   const handleResumeMatch = useCallback(async (id: string) => {
+    if (isProcessing[id]) return
+    setIsProcessing(prev => ({ ...prev, [id]: true }))
     const res = await changeLiveMatchStatusAction(id, "Live", 46)
+    setIsProcessing(prev => ({ ...prev, [id]: false }))
     if (res.success) {
       showToast("Match resumed for Second Half.", "success")
       refreshData()
     } else {
       showToast(res.error || "Action failed", "error")
     }
-  }, [showToast, refreshData])
+  }, [showToast, refreshData, isProcessing])
 
   const handleFullTime = useCallback(async (id: string) => {
+    if (isProcessing[id]) return
+    setIsProcessing(prev => ({ ...prev, [id]: true }))
     const res = await changeLiveMatchStatusAction(id, "Completed", 90)
+    setIsProcessing(prev => ({ ...prev, [id]: false }))
     if (res.success) {
       showToast("Match concluded! Status set to Completed.", "info")
       refreshData()
     } else {
       showToast(res.error || "Action failed", "error")
     }
-  }, [showToast, refreshData])
+  }, [showToast, refreshData, isProcessing])
 
   const handleScoreChange = useCallback(async (id: string, s1: number, s2: number) => {
+    if (isProcessing[id]) return
+    setIsProcessing(prev => ({ ...prev, [id]: true }))
     const res = await updateLiveMatchScoreAction(id, s1, s2)
+    setIsProcessing(prev => ({ ...prev, [id]: false }))
     if (res.success) {
-      showToast("Scores updated successfully", "success")
       refreshData()
     } else {
       showToast(res.error || "Failed to update scores", "error")
     }
-  }, [showToast, refreshData])
+  }, [showToast, refreshData, isProcessing])
 
   const handleGoalTeam1 = useCallback((matchItem: any) => {
-    handleScoreChange(matchItem.id, (matchItem.team1_score ?? 0) + 1, matchItem.team2_score ?? 0)
-  }, [handleScoreChange])
+    if (!isProcessing[matchItem.id]) {
+      handleScoreChange(matchItem.id, (matchItem.team1_score ?? 0) + 1, matchItem.team2_score ?? 0)
+    }
+  }, [handleScoreChange, isProcessing])
 
   const handleGoalTeam2 = useCallback((matchItem: any) => {
-    handleScoreChange(matchItem.id, matchItem.team1_score ?? 0, (matchItem.team2_score ?? 0) + 1)
-  }, [handleScoreChange])
+    if (!isProcessing[matchItem.id]) {
+      handleScoreChange(matchItem.id, matchItem.team1_score ?? 0, (matchItem.team2_score ?? 0) + 1)
+    }
+  }, [handleScoreChange, isProcessing])
 
   const handleResetScore = useCallback((matchItem: any) => {
+    if (isProcessing[matchItem.id]) return
     if (!confirm("Are you sure you want to reset scores to 0 - 0?")) return
     handleScoreChange(matchItem.id, 0, 0)
-  }, [handleScoreChange])
+  }, [handleScoreChange, isProcessing])
 
   const handleSaveMinute = useCallback(async (id: string, min: number) => {
+    if (isProcessing[id]) return
+    if (!selectedMatch) return
+    setIsProcessing(prev => ({ ...prev, [id]: true }))
     const res = await changeLiveMatchStatusAction(id, selectedMatch.status, min)
+    setIsProcessing(prev => ({ ...prev, [id]: false }))
     if (res.success) {
       showToast("Minute updated!", "success")
       refreshData()
     } else {
       showToast(res.error || "Failed to save minute", "error")
     }
-  }, [selectedMatch, showToast, refreshData])
+  }, [selectedMatch, showToast, refreshData, isProcessing])
 
   const handleOpenEdit = useCallback((matchItem: any) => {
     setSelectedMatch(matchItem)
@@ -283,7 +310,7 @@ function AdminLiveCenter() {
               <Plus className="size-4" />
               <span>Create Match</span>
             </Button>
-            <Link href="/ptn-admin">
+            <Link href="/ptn-admin" prefetch={true}>
               <Button variant="outline" className="border-white/10 hover:border-white/20 rounded-lg">
                 <ArrowLeft className="size-4 mr-2" />
                 Dashboard

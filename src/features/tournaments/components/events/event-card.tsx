@@ -1,5 +1,6 @@
 "use client"
 
+import { memo } from "react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
@@ -22,7 +23,7 @@ export interface EventCardProps {
   entryFeeIndividual?: number
 }
 
-export function EventCard({
+export const EventCard = memo(function EventCard({
   id,
   title,
   sport,
@@ -56,7 +57,7 @@ export function EventCard({
   const remainingSlots = Math.max(0, maxTeams - teamCount)
 
   return (
-    <Link href={`/tournaments/${id}`}>
+    <Link href={`/tournaments/${id}`} prefetch={true}>
       <motion.div
         whileHover={{ y: -5, scale: 1.02 }}
         className="group relative rounded-xl border border-white/10 bg-[#0A0A0A]/60 backdrop-blur-xl overflow-hidden transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,230,118,0.15)] hover:border-primary/50 flex flex-col h-full"
@@ -148,4 +149,4 @@ export function EventCard({
       </motion.div>
     </Link>
   )
-}
+})
