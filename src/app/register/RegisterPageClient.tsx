@@ -228,6 +228,18 @@ export default function RegisterPageClient() {
     if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
+  const [copied, setCopied] = useState(false)
+
+  const copyUpiId = async () => {
+    try {
+      await navigator.clipboard.writeText("harshitarya78@okicici")
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // fallback
+    }
+  }
+
   // Handle submit registration
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -858,11 +870,20 @@ export default function RegisterPageClient() {
                     <div className="space-y-3.5 bg-white/5 border border-white/5 rounded-xl p-5">
                       <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2.5">
                         <span className="text-white/40 font-medium">Account Holder</span>
-                        <span className="text-white font-bold">Play To Network</span>
+                        <span className="text-white font-bold">Harshit Verma</span>
                       </div>
                       <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2.5">
                         <span className="text-white/40 font-medium">UPI ID</span>
-                        <span className="font-mono text-white bg-white/5 border border-white/10 px-1.5 py-0.5 rounded text-xs select-all">ptn.sports@upi</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-white bg-white/5 border border-white/10 px-1.5 py-0.5 rounded text-xs select-all">harshitarya78@okicici</span>
+                          <button
+                            type="button"
+                            onClick={copyUpiId}
+                            className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md border border-white/10 bg-white/5 text-primary hover:bg-primary/10 hover:border-primary/30 transition-all shrink-0"
+                          >
+                            {copied ? "Copied!" : "Copy"}
+                          </button>
+                        </div>
                       </div>
                       <div className="flex justify-between items-start text-sm">
                         <span className="text-white/40 font-medium pt-0.5">Payment Note</span>
@@ -871,6 +892,10 @@ export default function RegisterPageClient() {
                         </span>
                       </div>
                     </div>
+
+                    <p className="text-[11px] text-white/40 leading-relaxed text-center border border-white/5 bg-white/[0.02] rounded-lg px-3 py-2">
+                      Please ensure your payment is sent to the UPI ID shown above before uploading the payment screenshot.
+                    </p>
 
                     {/* Payment Instructions */}
                     <div className="space-y-2.5">
