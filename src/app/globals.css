@@ -187,8 +187,6 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  /* Prevent horizontal scroll on all devices */
-  overflow-x: hidden;
 }
 
 body {
@@ -489,18 +487,9 @@ button, a, [role="button"] {
 /* ============================================ */
 /* MOBILE OPTIMIZATIONS                         */
 /* ============================================ */
-html {
-  scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
-}
-
 button, a, [role="button"], input, select, textarea {
   touch-action: manipulation;
-}
-
-body {
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* Minimum 48px tap targets on mobile */
