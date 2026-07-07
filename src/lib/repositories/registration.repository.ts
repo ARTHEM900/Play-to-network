@@ -9,8 +9,6 @@ export interface RegistrationData {
   payment_status: 'Pending' | 'Verified' | 'Failed'
   registration_status: 'Pending' | 'Approved' | 'Rejected'
   payment_screenshot_url: string
-  email_sent_status?: 'Pending' | 'Sent' | 'Failed'
-  email_error_message?: string | null
   user_id: string
   created_at?: string
 }
@@ -139,26 +137,6 @@ export const RegistrationRepository = {
     const updates: any = { registration_status: status }
     if (paymentStatus) {
       updates.payment_status = paymentStatus
-    }
-    const { data, error } = await supabase
-      .from('registrations')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single()
-    if (error) throw error
-    return data
-  },
-
-  async updateEmailSentStatus(
-    supabase: SupabaseClient,
-    id: string,
-    emailSentStatus: 'Pending' | 'Sent' | 'Failed',
-    emailErrorMessage?: string | null
-  ): Promise<RegistrationData> {
-    const updates: any = { email_sent_status: emailSentStatus }
-    if (emailErrorMessage !== undefined) {
-      updates.email_error_message = emailErrorMessage
     }
     const { data, error } = await supabase
       .from('registrations')

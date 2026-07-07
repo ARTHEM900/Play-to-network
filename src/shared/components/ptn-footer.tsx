@@ -1,18 +1,25 @@
 import { Globe, AtSign, Send } from "lucide-react"
 import { PtnLogo } from "./ptn-logo"
+import Link from "next/link"
 
 const FOOTER_LINKS = [
   {
     title: "Platform",
-    links: ["Events", "Live Scores", "Teams", "Leaderboard"],
+    links: [
+      { label: "Events", href: "/events" },
+    ],
   },
   {
     title: "Company",
-    links: ["About", "Careers", "Press", "Contact"],
+    links: [
+      { label: "About", href: "/about" },
+    ],
   },
   {
     title: "Support",
-    links: ["Help Center", "Rules", "Terms", "Privacy"],
+    links: [
+      { label: "Rules", href: "/rules" },
+    ],
   },
 ]
 
@@ -34,14 +41,14 @@ export function PtnFooter() {
             </p>
             <div className="mt-5 flex gap-3">
               {[Globe, AtSign, Send].map((Icon, i) => (
-                <a
+                <Link
                   key={i}
                   href="#"
                   className="flex h-10 w-10 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
                   aria-label="Social media"
                 >
                   <Icon className="h-5 w-5" />
-                </a>
+                </Link>
               ))}
             </div>
           </div>
@@ -53,13 +60,13 @@ export function PtnFooter() {
               </h3>
               <ul className="mt-4 space-y-3">
                 {col.links.map((link) => (
-                  <li key={link}>
-                    <a
-                      href="#"
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
-                      {link}
-                    </a>
+                      {link.label}
+                    </Link>
                   </li>
                 ))}
               </ul>

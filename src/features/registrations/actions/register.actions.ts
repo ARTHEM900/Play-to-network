@@ -4,9 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { TeamRepository } from '@/lib/repositories/team.repository'
 import { PlayerRepository } from '@/lib/repositories/player.repository'
 import { RegistrationRepository } from '@/lib/repositories/registration.repository'
-import { TournamentRepository } from '@/lib/repositories/tournament.repository'
-import { EmailService } from '@/features/email/services/email.service'
-import type { EmailResult } from '@/features/email/services/email.service'
+
 
 export interface RegisterActionInput {
   regType: 'team' | 'individual'
@@ -191,60 +189,9 @@ export async function registerPlayerAction(
       payment_status: 'Pending',
       registration_status: 'Pending',
       payment_screenshot_url: paymentScreenshotUrl,
-      email_sent_status: 'Pending',
       user_id: userId
     })
     console.log('[REGISTER] Registration Saved — database transaction complete')
-
-    const registrationId = regData.id
-
-    // Fetch tournament details dynamically
-    let tournamentName = process.env.NEXT_PUBLIC_TOURNAMENT_NAME || 'Play To Network 3v3 Mini Football Tournament'
-    let tournamentDate = process.env.NEXT_PUBLIC_TOURNAMENT_DATE || 'Sunday, July 12th'
-    let tournamentLocation = process.env.NEXT_PUBLIC_TOURNAMENT_LOCATION || 'Hyperdrive Arena'
-    try {
-      const tourney = await TournamentRepository.getTournamentById(supabase, TOURNAMENT_ID)
-      if (tourney) {
-        tournamentName = tourney.title || tournamentName
-        tournamentDate = tourney.start_date || tournamentDate
-        tournamentLocation = tourney.location || tournamentLocation
-      }
-    } catch (err) {
-      console.error('[REGISTER] Failed to fetch tournament info for email payload:', err)
-    }
-
-    // 4. Send confirmation email — non-blocking; registration succeeds regardless
-    let emailResult: EmailResult = { success: false, error: '' }
-    try {
-      emailResult = await EmailService.sendRegistrationSubmittedEmail({
-        registrationNumber,
-        name: name,
-        email: email,
-        type: regType,
-        fee: regType === 'team' ? parseInt(process.env.TOURNAMENT_TEAM_FEE || '3000', 10) : parseInt(process.env.TOURNAMENT_INDIVIDUAL_FEE || '600', 10),
-        paymentStatus: 'Pending',
-        tournamentName,
-        date: tournamentDate,
-        location: tournamentLocation
-      })
-      console.log('[EMAIL] server action result:', JSON.stringify(emailResult))
-      if (!emailResult.success) {
-        console.error('[EMAIL] Registration confirmation email failed:', emailResult.error)
-      }
-    } catch (emailErr: any) {
-      console.error('[EMAIL] Resend threw an exception outside of sendRegistrationSubmittedEmail:', emailErr)
-      emailResult = { success: false, error: emailErr.message || String(emailErr) }
-    }
-
-    // 5. Update email_sent_status and error message in the database (non-critical)
-    if (registrationId) {
-      const finalEmailSentStatus = emailResult.success ? 'Sent' : 'Failed'
-      try {
-        await RegistrationRepository.updateEmailSentStatus(supabase, registrationId, finalEmailSentStatus, emailResult.error || null)
-      } catch (updateErr) {
-        console.error('[REGISTER] Failed to update email sent status (non-critical):', updateErr)
-      }
-    }
 
     return {
       success: true,

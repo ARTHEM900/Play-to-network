@@ -6,6 +6,36 @@ import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
 import { PtnLogo } from "./ptn-logo"
+import { useState, useEffect } from "react"
+
+function CountdownTimer() {
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+
+  useEffect(() => {
+    const target = new Date("2026-07-19T00:00:00+05:30")
+
+    const update = () => {
+      const diff = target.getTime() - Date.now()
+      if (diff <= 0) return
+      setTimeLeft({
+        days: Math.floor(diff / 86400000),
+        hours: Math.floor((diff % 86400000) / 3600000),
+        minutes: Math.floor((diff % 3600000) / 60000),
+        seconds: Math.floor((diff % 60000) / 1000),
+      })
+    }
+
+    update()
+    const interval = setInterval(update, 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <div className="font-mono font-bold text-white tracking-wider">
+      {String(timeLeft.days).padStart(2, "0")} : {String(timeLeft.hours).padStart(2, "0")} : {String(timeLeft.minutes).padStart(2, "0")} : {String(timeLeft.seconds).padStart(2, "0")}
+    </div>
+  )
+}
 
 export function PtnHero() {
   return (
@@ -164,7 +194,7 @@ export function PtnHero() {
                   <div className="p-3 -mt-6 relative z-10">
                     <span className="text-[8px] uppercase font-bold text-white/50 tracking-widest flex items-center gap-1 mb-2"><Trophy className="w-3 h-3" /> Upcoming Event</span>
                     <span className="text-[8px] uppercase font-bold text-white bg-white/10 px-1.5 py-0.5 rounded border border-white/5 tracking-wider w-fit block mb-1">Registration Ends In</span>
-                    <div className="text-sm font-mono font-bold text-white mb-2">03 : 12 : 45</div>
+                    <div className="text-sm mb-2"><CountdownTimer /></div>
                     <h4 className="font-bold text-[11px] text-white leading-tight">Delhi Football Cup</h4>
                     <span className="text-[9px] text-white/50 mt-1 block">12 Teams Registered</span>
                   </div>

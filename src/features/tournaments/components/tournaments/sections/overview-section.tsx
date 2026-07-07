@@ -218,7 +218,7 @@ export async function OverviewSection({ tournamentId }: { tournamentId?: string 
               <span className="text-sm font-bold text-white leading-tight">
                 {tournament?.start_date && tournament?.end_date 
                   ? `${tournament.start_date} - ${tournament.end_date}`
-                  : "June 30, 2026 - July 02, 2026"}
+                  : "July 19, 2026"}
               </span>
               <span className="text-[9px] uppercase font-bold text-white/40 tracking-wider">Date</span>
             </div>

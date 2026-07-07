@@ -27,7 +27,6 @@ import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
 
-import { config } from "@/lib/config"
 import { createClient } from "@/lib/supabase/client"
 import { registerPlayerAction } from "@/features/registrations/actions/register.actions"
 
@@ -286,102 +285,75 @@ function RegisterPageClient() {
     setIsSubmitting(true)
     setFileError(null)
 
-    if (config.useLiveRegistration) {
-      try {
-        const supabase = createClient()
+    try {
+      const supabase = createClient()
 
-        // 0. Ensure the user is authenticated
-        const { data: { user: currentUser } } = await supabase.auth.getUser()
-        if (!currentUser) {
-          setFileError("You must be logged in to register. Please sign in and try again.")
-          setIsSubmitting(false)
-          return
-        }
-        const email = currentUser.email || ""
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      if (!currentUser) {
+        setFileError("You must be logged in to register. Please sign in and try again.")
+        setIsSubmitting(false)
+        return
+      }
+      const email = currentUser.email || ""
 
-        // 1. Upload payment screenshot to payment-screenshots bucket (private, user-scoped)
-        const fileExt = screenshot.name.split('.').pop()
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`
-        const filePath = `${currentUser.id}/${fileName}`
+      const fileExt = screenshot.name.split('.').pop()
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`
+      const filePath = `${currentUser.id}/${fileName}`
 
-        const { data: uploadData, error: uploadError } = await supabase
-          .storage
-          .from('payment-screenshots')
-          .upload(filePath, screenshot, {
-            cacheControl: '3600',
-            upsert: false
-          })
-
-        if (uploadError) {
-          console.error("Upload error:", uploadError)
-          setFileError("Unable to upload payment proof. Please try again.")
-          setIsSubmitting(false)
-          return
-        }
-
-        // 2. Generate a signed URL so the bucket can stay private
-        const { data: signedData, error: signedError } = await supabase
-          .storage
-          .from('payment-screenshots')
-          .createSignedUrl(filePath, 60 * 60 * 24 * 7) // 7-day expiry
-
-        const payment_screenshot_url = signedData?.signedUrl || ''
-
-        // 2. Call server-side action to insert records securely
-        const result = await registerPlayerAction({
-          regType,
-          paymentScreenshotUrl: payment_screenshot_url,
-          teamForm: regType === "team" ? teamForm : undefined,
-          indForm: regType === "individual" ? indForm : undefined
+      const { error: uploadError } = await supabase
+        .storage
+        .from('payment-screenshots')
+        .upload(filePath, screenshot, {
+          cacheControl: '3600',
+          upsert: false
         })
 
-        if (!result.success) {
-          console.error("Registration action failed:", result.error)
-          setFileError(result.error || "Registration could not be completed. Please try again.")
-          setIsSubmitting(false)
-          return
-        }
-
+      if (uploadError) {
+        console.error("Upload error:", uploadError)
+        setFileError("Unable to upload payment proof. Please try again.")
         setIsSubmitting(false)
-        
-        // Redirect passing values
-        const successParams: Record<string, string> = {
-          type: regType,
-          name: name,
-          email: email,
-          fee: String(fee),
-          tournamentId: TOURNAMENT_ID,
-          registration_number: result.registrationNumber || '',
-          ...(regType === "team" ? { captain: teamForm.captainName, preferredNation: teamForm.preferredNation } : { position: indForm.position })
-        }
-        const successUrl = `/register/success?` + new URLSearchParams(successParams).toString()
-
-        router.push(successUrl)
-      } catch (error: any) {
-        console.error("Registration error:", error)
-        setFileError("Registration could not be completed. Please try again.")
-        setIsSubmitting(false)
+        return
       }
-    } else {
-      // Simulate upload delay (2 seconds)
-      setTimeout(() => {
+
+      const { data: signedData } = await supabase
+        .storage
+        .from('payment-screenshots')
+        .createSignedUrl(filePath, 60 * 60 * 24 * 7)
+
+      const payment_screenshot_url = signedData?.signedUrl || ''
+
+      const result = await registerPlayerAction({
+        regType,
+        paymentScreenshotUrl: payment_screenshot_url,
+        teamForm: regType === "team" ? teamForm : undefined,
+        indForm: regType === "individual" ? indForm : undefined
+      })
+
+      if (!result.success) {
+        console.error("Registration action failed:", result.error)
+        setFileError(result.error || "Registration could not be completed. Please try again.")
         setIsSubmitting(false)
-        const randomNum = Math.floor(100000 + Math.random() * 900000)
-        const code = regType === "team" ? "TEM" : "IND"
-        const registration_number = `PTN-3V3-${code}-${randomNum}`
+        return
+      }
 
-        const successUrl = `/register/success?` + new URLSearchParams({
-          type: regType,
-          name: name,
-          email: "",
-          fee: String(fee),
-          tournamentId: TOURNAMENT_ID,
-          registration_number: registration_number,
-          ...(regType === "team" ? { captain: teamForm.captainName, preferredNation: teamForm.preferredNation } : { position: indForm.position })
-        }).toString()
+      setIsSubmitting(false)
+      
+      const successParams: Record<string, string> = {
+        type: regType,
+        name: name,
+        email: email,
+        fee: String(fee),
+        tournamentId: TOURNAMENT_ID,
+        registration_number: result.registrationNumber || '',
+        ...(regType === "team" ? { captain: teamForm.captainName, preferredNation: teamForm.preferredNation } : { position: indForm.position })
+      }
+      const successUrl = `/register/success?` + new URLSearchParams(successParams).toString()
 
-        router.push(successUrl)
-      }, 2000)
+      router.push(successUrl)
+    } catch (error: any) {
+      console.error("Registration error:", error)
+      setFileError("Registration could not be completed. Please try again.")
+      setIsSubmitting(false)
     }
   }
 

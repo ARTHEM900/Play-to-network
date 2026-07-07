@@ -32,8 +32,8 @@ export default async function EventsPage() {
       teamCount: t.current_teams ?? t.team_count ?? 0,
       maxTeams: t.max_teams ?? 12,
       registrationStatus: (t.status || "Open") as "Open" | "Closed" | "Closing Soon",
-      registrationDeadline: t.end_date || "June 29, 2026",
-      startDate: t.start_date || "June 30, 2026",
+      registrationDeadline: t.end_date || "July 19, 2026",
+      startDate: t.start_date || "July 19, 2026",
       imageUrl: t.image_url || "/stadium_bg.jpg",
       format: t.format || "5 vs 5",
       prizePool: t.prize_pool || "₹10,000",
@@ -51,7 +51,7 @@ export default async function EventsPage() {
         teamCount: featuredTourney.current_teams ?? 0,
         maxTeams: featuredTourney.max_teams ?? 12,
         registrationStatus: (featuredTourney.status || "Open") as 'Open' | 'Closed' | 'Closing Soon',
-        startDate: featuredTourney.start_date || "June 30, 2026",
+        startDate: featuredTourney.start_date || "July 19, 2026",
         prizePool: featuredTourney.prize_pool || "₹10,000",
         description: featuredTourney.description || "A competitive football tournament hosted by Play To Network."
       }

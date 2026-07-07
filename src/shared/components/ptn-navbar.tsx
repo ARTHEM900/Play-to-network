@@ -11,10 +11,7 @@ import { useRouter } from "next/navigation"
 
 const NAV_LINKS = [
   { label: "Events", href: "/events" },
-  { label: "Live", href: "#live" },
-  { label: "Standings", href: "#standings" },
-  { label: "Teams", href: "#teams" },
-  { label: "Organizers", href: "#organizers" },
+  { label: "About", href: "/about" },
 ]
 
 export function PtnNavbar() {
@@ -116,12 +113,12 @@ export function PtnNavbar() {
         <ul className="hidden items-center gap-8 md:flex">
           {computedLinks.map((link) => (
             <li key={link.label} className="relative py-5">
-              <a
+              <Link
                 href={link.href}
                 className={`text-sm font-medium transition-colors hover:text-white ${link.label === "Events" ? "text-white" : "text-white/70"}`}
               >
                 {link.label}
-              </a>
+              </Link>
               {link.label === "Events" && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-t-sm"></div>
               )}

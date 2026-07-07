@@ -2,16 +2,15 @@
 
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { Home, Calendar, Radio, Shield, User } from "lucide-react"
+import { Home, Calendar, Shield, Info } from "lucide-react"
 import { cn } from "@/shared/utils/utils"
 import { useMediaQuery } from "@/shared/hooks/useMediaQuery"
 
 const NAV_ITEMS = [
   { label: "Home", href: "/", icon: Home },
   { label: "Events", href: "/events", icon: Calendar },
-  { label: "Live", href: "/live", icon: Radio },
+  { label: "About", href: "/about", icon: Info },
   { label: "Dashboard", href: "/dashboard", icon: Shield },
-  { label: "Profile", href: "/profile", icon: User },
 ]
 
 export function MobileBottomNav() {

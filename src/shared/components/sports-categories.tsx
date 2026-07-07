@@ -1,6 +1,6 @@
 "use client"
 
-import { Trophy, CircleDot, MonitorPlay, Target, Activity } from "lucide-react"
+import { CircleDot, Target, Activity, Trophy, Monitor, Tv } from "lucide-react"
 import { motion } from "framer-motion"
 
 const sportsViewport = { once: true, margin: "-50px" }
@@ -16,12 +16,13 @@ const sportsCardVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
 }
 
-const CATEGORIES = [
-  { name: "Football", icon: CircleDot },
-  { name: "Cricket", icon: Target },
-  { name: "Basketball", icon: Activity },
-  { name: "Badminton", icon: Trophy },
-  { name: "Esports", icon: MonitorPlay },
+const CATEGORIES: { name: string; icon: any; status: "live" | "coming-soon" }[] = [
+  { name: "Football", icon: CircleDot, status: "live" },
+  { name: "Cricket", icon: Target, status: "coming-soon" },
+  { name: "Badminton", icon: Trophy, status: "coming-soon" },
+  { name: "Volleyball", icon: Monitor, status: "coming-soon" },
+  { name: "Basketball", icon: Activity, status: "coming-soon" },
+  { name: "BGMI", icon: Tv, status: "coming-soon" },
 ]
 
 export function SportsCategories() {
@@ -37,16 +38,22 @@ export function SportsCategories() {
         >
           {CATEGORIES.map((cat) => {
             const Icon = cat.icon
+            const isLive = cat.status === "live"
             return (
               <motion.div 
                 key={cat.name} 
                 variants={sportsCardVariants}
-                className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition-colors cursor-pointer group"
+                className={`flex items-center gap-3 text-muted-foreground transition-colors group ${isLive ? "cursor-pointer hover:text-foreground" : "cursor-default opacity-60"}`}
               >
                 <div className="rounded-md bg-secondary p-2 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                   <Icon className="h-5 w-5" />
                 </div>
-                <span className="font-semibold text-sm tracking-wide uppercase">{cat.name}</span>
+                <div className="flex flex-col">
+                  <span className="font-semibold text-sm tracking-wide uppercase">{cat.name}</span>
+                  <span className={`text-[10px] font-bold uppercase tracking-widest ${isLive ? "text-primary" : "text-muted-foreground"}`}>
+                    {isLive ? "LIVE" : "Coming Soon"}
+                  </span>
+                </div>
               </motion.div>
             )
           })}
