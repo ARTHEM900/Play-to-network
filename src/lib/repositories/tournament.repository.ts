@@ -1,4 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js'
+import { EVENT_CONFIG } from '@/lib/config/event'
 
 export interface TournamentData {
   id?: string
@@ -36,8 +37,8 @@ export const TournamentRepository = {
         return {
           ...t,
           location: "Delhi (Near Metro Routes)",
-          start_date: "July 12, 2026",
-          end_date: "July 12, 2026",
+          start_date: EVENT_CONFIG.eventDate,
+          end_date: EVENT_CONFIG.eventDate,
           brochure_url: "/brochure/mini-fifa-world-cup-2026.pdf"
         }
       }
@@ -59,8 +60,8 @@ export const TournamentRepository = {
       return {
         ...data,
         location: "Delhi (Near Metro Routes)",
-        start_date: "July 12, 2026",
-        end_date: "July 12, 2026",
+        start_date: "July 19, 2026",
+        end_date: "July 19, 2026",
         brochure_url: "/brochure/mini-fifa-world-cup-2026.pdf",
         about_tournament: {
           what_is_mini_fifa: "Mini FIFA is an elite 5v5 offline football tournament designed to capture the intensity and excitement of the FIFA World Cup on a compact scale.",
@@ -155,7 +156,7 @@ export const TournamentRepository = {
           },
           {
             question: "When and where is the tournament?",
-            answer: "The tournament is on Sunday, 12th July 2026 at Delhi (near metro routes for easy accessibility). Reach the venue at least 30 minutes before your scheduled match."
+            answer: `The tournament is on Sunday, ${EVENT_CONFIG.eventDateFaq} at Delhi (near metro routes for easy accessibility). Reach the venue at least 30 minutes before your scheduled match.`
           }
         ],
         contacts: {

@@ -1,0 +1,15 @@
+export const EVENT_CONFIG = {
+  title: "Mini FIFA World Cup 2026",
+  eventDate: "July 19, 2026",
+  eventDateFull: "Sunday, July 19th",
+  eventDateISO: "2026-07-19T00:00:00+05:30",
+  eventDateShort: "2026-07-19",
+  eventDateFaq: "19th July 2026",
+  registrationDeadline: "July 19, 2026",
+  location: "Delhi (Near Metro Routes)",
+  teamFee: 3000,
+  individualFee: 600,
+  maxTeams: 12,
+  defaultPrizePool: "₹10,000",
+  defaultFormat: "5 vs 5",
+}

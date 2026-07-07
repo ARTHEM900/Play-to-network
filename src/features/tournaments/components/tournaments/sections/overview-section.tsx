@@ -1,3 +1,4 @@
+import { EVENT_CONFIG } from "@/lib/config/event"
 import { Trophy, Activity, Users, Star, MapPin, Calendar, Clock, Coins, CheckCircle2, Phone, Download } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { TournamentRepository } from "@/lib/repositories/tournament.repository"
@@ -218,7 +219,7 @@ export async function OverviewSection({ tournamentId }: { tournamentId?: string 
               <span className="text-sm font-bold text-white leading-tight">
                 {tournament?.start_date && tournament?.end_date 
                   ? `${tournament.start_date} - ${tournament.end_date}`
-                  : "July 19, 2026"}
+                  : EVENT_CONFIG.eventDate}
               </span>
               <span className="text-[9px] uppercase font-bold text-white/40 tracking-wider">Date</span>
             </div>

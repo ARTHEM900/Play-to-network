@@ -1,5 +1,6 @@
 "use client"
 
+import { EVENT_CONFIG } from "@/lib/config/event"
 import { Button } from "@/shared/components/ui/button"
 import { ArrowRight, Trophy, Users, Activity } from "lucide-react"
 import { motion } from "framer-motion"
@@ -12,7 +13,7 @@ function CountdownTimer() {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
 
   useEffect(() => {
-    const target = new Date("2026-07-19T00:00:00+05:30")
+    const target = new Date(EVENT_CONFIG.eventDateISO)
 
     const update = () => {
       const diff = target.getTime() - Date.now()

@@ -11,6 +11,7 @@ const EventsFilter = dynamic(() => import("@/features/tournaments/components/eve
 const EventsTabs = dynamic(() => import("@/features/tournaments/components/events/events-tabs").then(m => m.EventsTabs))
 import { Trophy } from "lucide-react"
 
+import { EVENT_CONFIG } from "@/lib/config/event"
 import { createClient } from "@/lib/supabase/server"
 import { TournamentRepository } from "@/lib/repositories/tournament.repository"
 import { MatchRepository } from "@/lib/repositories/match.repository"
@@ -32,8 +33,8 @@ export default async function EventsPage() {
       teamCount: t.current_teams ?? t.team_count ?? 0,
       maxTeams: t.max_teams ?? 12,
       registrationStatus: (t.status || "Open") as "Open" | "Closed" | "Closing Soon",
-      registrationDeadline: t.end_date || "July 19, 2026",
-      startDate: t.start_date || "July 19, 2026",
+      registrationDeadline: t.end_date || EVENT_CONFIG.eventDate,
+      startDate: t.start_date || EVENT_CONFIG.eventDate,
       imageUrl: t.image_url || "/stadium_bg.jpg",
       format: t.format || "5 vs 5",
       prizePool: t.prize_pool || "₹10,000",
@@ -51,7 +52,7 @@ export default async function EventsPage() {
         teamCount: featuredTourney.current_teams ?? 0,
         maxTeams: featuredTourney.max_teams ?? 12,
         registrationStatus: (featuredTourney.status || "Open") as 'Open' | 'Closed' | 'Closing Soon',
-        startDate: featuredTourney.start_date || "July 19, 2026",
+        startDate: featuredTourney.start_date || EVENT_CONFIG.eventDate,
         prizePool: featuredTourney.prize_pool || "₹10,000",
         description: featuredTourney.description || "A competitive football tournament hosted by Play To Network."
       }
