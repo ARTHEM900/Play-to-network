@@ -7,18 +7,23 @@ const FOOTER_LINKS = [
     title: "Platform",
     links: [
       { label: "Events", href: "/events" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
       { label: "About", href: "/about" },
     ],
   },
   {
-    title: "Support",
+    title: "Rules",
     links: [
-      { label: "Rules", href: "/rules" },
+      { label: "Tournament Rules", href: "/rules" },
+      { label: "Community Guidelines", href: "/guidelines" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Terms & Conditions", href: "/terms" },
+      { label: "Refund Policy", href: "/refund" },
+      { label: "Cancellation Policy", href: "/cancellation" },
     ],
   },
 ]

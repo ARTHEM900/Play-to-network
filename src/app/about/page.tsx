@@ -1,8 +1,8 @@
 import { PtnNavbar } from "@/shared/components/ptn-navbar"
 import { PtnFooter } from "@/shared/components/ptn-footer"
-import { Trophy, Users, Target, Shield } from "lucide-react"
+import { Trophy, Eye, BookOpen, Users, Target, Shield } from "lucide-react"
 
-const VALUES = [
+const BRAND_VALUES = [
   {
     icon: Trophy,
     title: "Competition",
@@ -30,34 +30,52 @@ export default function AboutPage() {
     <main className="min-h-screen bg-background text-foreground selection:bg-primary/30">
       <PtnNavbar />
       <div className="h-20 w-full" />
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-16">
-          <span className="text-primary font-bold tracking-wider uppercase text-sm">About Us</span>
-          <h1 className="mt-4 text-4xl md:text-5xl font-heading font-black text-white uppercase tracking-tight">
-            Compete. Connect. Conquer.
+          <span className="text-primary font-bold tracking-wider uppercase text-sm">About Play To Network</span>
+          <h1 className="mt-4 text-5xl md:text-7xl font-heading font-black text-white uppercase tracking-tight">
+            PLAY<span className="text-primary">.</span> COMPETE<span className="text-primary">.</span> BELONG<span className="text-primary">.</span>
           </h1>
-          <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
-            Play To Network is Delhi&apos;s fastest growing amateur sports community. We organize tournaments, 
-            connect players, and provide a platform for competitive sports across football, cricket, badminton, 
-            basketball, volleyball, and esports.
+          <p className="mt-6 text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            Play To Network is Delhi&apos;s fastest growing amateur sports community. We organize tournaments,
+            connect players, and provide a platform for competitive sports across football, cricket, badminton,
+            basketball, volleyball, and esports. Whether you&apos;re a seasoned athlete or picking up a sport for the
+            first time, you belong here.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
           <div className="rounded-xl border border-border bg-card p-8">
+            <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center text-primary mb-5">
+              <BookOpen className="w-6 h-6" />
+            </div>
             <h2 className="text-2xl font-heading font-bold text-white uppercase tracking-tight mb-4">Our Mission</h2>
             <p className="text-muted-foreground leading-relaxed">
-              To make amateur sports accessible, organized, and competitive for everyone in India. 
-              We provide the infrastructure for players to find teams, tournaments to find participants, 
+              To make amateur sports accessible, organized, and competitive for everyone in India.
+              We provide the infrastructure for players to find teams, tournaments to find participants,
               and communities to thrive.
             </p>
           </div>
           <div className="rounded-xl border border-border bg-card p-8">
+            <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center text-primary mb-5">
+              <Eye className="w-6 h-6" />
+            </div>
+            <h2 className="text-2xl font-heading font-bold text-white uppercase tracking-tight mb-4">Our Vision</h2>
+            <p className="text-muted-foreground leading-relaxed">
+              To become India&apos;s most trusted platform for amateur sports — where every player finds
+              their team, every team finds their tournament, and every tournament finds its community.
+            </p>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-8">
+            <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center text-primary mb-5">
+              <Users className="w-6 h-6" />
+            </div>
             <h2 className="text-2xl font-heading font-bold text-white uppercase tracking-tight mb-4">Our Story</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Founded in Delhi, Play To Network started with a simple idea: bring amateur athletes together 
-              on a single platform. What began as small local tournaments has grown into a thriving community 
-              of players, teams, and organizers.
+              Founded in Delhi, Play To Network started with a simple idea: bring amateur athletes together
+              on a single platform. What began as small local tournaments has grown into a thriving community
+              of players, teams, and organizers across multiple sports.
             </p>
           </div>
         </div>
@@ -67,8 +85,8 @@ export default function AboutPage() {
           <p className="mt-2 text-muted-foreground">What drives us every day.</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {VALUES.map((val) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+          {BRAND_VALUES.map((val) => {
             const Icon = val.icon
             return (
               <div key={val.title} className="rounded-xl border border-border bg-card p-6 text-center">
@@ -88,7 +106,8 @@ export default function AboutPage() {
             Want to partner with us, organize a tournament, or just say hello? Reach out to us on our social channels or at our events.
           </p>
         </div>
-      </div>
+      </section>
+
       <PtnFooter />
     </main>
   )
